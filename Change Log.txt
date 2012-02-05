@@ -1,0 +1,12 @@
+/**
+* Authenticate
+* Author: Objective HTML (Justin Kimbrell)
+* Version: 1.0
+* Build: 20120204
+* Copyright 2012 - All rights reserved
+* http://objectivehtml.com
+*/
+
+Version 1.0 - 02/02/2012
+------------------------
+Initial commit.
