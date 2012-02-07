@@ -8,7 +8,7 @@
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/authenticate
  * @version		1.0
- * @build		20120204
+ * @build		20120207
  */
  
 class Authenticate_upd {
@@ -20,42 +20,8 @@ class Authenticate_upd {
 	
 	private $tables = array(
 		/*
-		'auto_email_settings'	=> array(
-			'key'	=> array(
-				'type'				=> 'varchar',
-				'constraint'		=> 100,
-				'primary_key'		=> TRUE
-			),
-			'value'	=> array(
-				'type'			=> 'text'
-			)
-		),
-		'auto_email_channels' 	=> array(
-			'id'	=> array(
-				'type'				=> 'int',
-				'constraint'		=> 100,
-				'primary_key'		=> TRUE,
-				'auto_increment'	=> TRUE
-			),
-			'channel_id' => array(
-				'type'			=> 'int',
-				'constraint' 	=> 100
-			),
-			'categories' => array(
-				'type'	=> 'TEXT'
-			),
-			'member_groups' => array(
-				'type'	=> 'TEXT'
-			),
-			'statuses' => array(
-				'type'	=> 'TEXT'
-			),
-			'message'	=> array(
-				'type'	=> 'LONGTEXT'
-			),
-			'email_settings' => array(
-				'type'	=> 'LONGTEXT'
-			)
+		'table_name' => array(
+			'key' => 'value'
 		)
 		*/
 	);
@@ -63,8 +29,8 @@ class Authenticate_upd {
 	private $actions = array(
 		/*
 		array(
-		    'class'     => 'Auto_email_mcp',
-		    'method'    => 'save_settings'
+		    'class'     => '',
+		    'method'    => ''
 		)
 		*/
 	);
@@ -85,13 +51,10 @@ class Authenticate_upd {
 	
 	public function install()
 	{	
-		$this->EE->load->dbforge();
+		$this->EE->load->library('data_forge');
 		
-		//create tables from $this->tables array
-		$this->EE->load->model('table_model');
-		
-		$this->EE->table_model->update_tables($this->tables);
-		
+		$this->EE->data_forge->update_tables($this->tables);
+				
 		$data = array(
 	        'module_name' 		 => $this->mod_name,
 	        'module_version' 	 => $this->version,

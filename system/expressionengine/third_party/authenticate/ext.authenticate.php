@@ -8,7 +8,7 @@
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/authenticate
  * @version		1.0
- * @build		20120204
+ * @build		20120207
  */
  
 class Authenticate_ext {
