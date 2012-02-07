@@ -7,7 +7,7 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/authenticate
- * @version		1.0
+ * @version		1.0.1
  * @build		20120207
  */
  
@@ -49,7 +49,14 @@ class Authenticate {
 				
 				if(count($this->EE->base_form->field_errors) == 0)
 				{
-					$this->EE->base_form->set_error(lang('authenticate_failed_message'));
+					if($auth_type == 'username')
+					{
+						$this->EE->base_form->set_error(lang('authenticate_failed_message_user'));
+					}
+					else
+					{
+						$this->EE->base_form->set_error(lang('authenticate_failed_message_email'));
+					}
 				}
 			}
 		}
@@ -73,9 +80,14 @@ class Authenticate {
 		return $form_open;
 	}
 	
-	function forgot_password()
+	public function login()
 	{
-		$username_field = $this->param('username_field', 'username');
+		return $this->login_form();
+	}
+		
+	function forgot_password_form()
+	{
+		$email_field = $this->param('email_field', 'email');
 		
 		$this->EE->base_form->validate();
 		
@@ -83,7 +95,7 @@ class Authenticate {
 		{
 			$emails = $this->EE->channel_data->get_members(array(
 				'where' => array(
-					'email' => $this->EE->input->post($username_field)
+					'email' => $this->EE->input->post($email_field)
 				)
 			));
 			
@@ -111,20 +123,16 @@ class Authenticate {
 			'authenticate_reset_password' => 1
 		);
 		
-		if($this->param('auth_type', 'username') == 'email')
-		{
-			$rule = 'required|valid_email|trim';
-		}
-		else
-		{
-			$rule = 'required|trim';
-		}
-		
-		$this->EE->base_form->set_rule($username_field, $rule);
+		$this->EE->base_form->set_rule($email_field, 'required|valid_email|trim');
 		
 		$form_open = $this->EE->base_form->open($hidden_fields);
 		
 		return $form_open;
+	}
+	
+	public function forgot_password()
+	{
+		return $this->forgot_password_form();
 	}
 	
 	private function parse($vars, $tagdata = FALSE)

@@ -7,7 +7,7 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/authenticate
- * @version		1.0
+ * @version		1.0.1
  * @build		20120207
  */
  
