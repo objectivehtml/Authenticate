@@ -7,6 +7,11 @@
 * http://objectivehtml.com
 */
 
+Version 1.0.1 - 02/02/2012
+------------------------
+Minor bug fixes. Removed dependency to table_model.php in favor the Data_forge.php library.
+
+
 Version 1.0 - 02/02/2012
 ------------------------
 Initial commit.
