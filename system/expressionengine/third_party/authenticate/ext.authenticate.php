@@ -16,7 +16,7 @@ class Authenticate_ext {
     public $name       		= 'Authenticate';
     public $version        	= '1.0';
     public $description    	= '';
-    public $settings_exist 	= 'y';
+    public $settings_exist 	= 'n';
   	public $docs_url       	= 'http://www.objectivehtml.com/authentication/documentation';
 	public $settings 		= array();
 	public $required_by 	= array('module');
