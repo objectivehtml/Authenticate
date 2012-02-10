@@ -11,10 +11,10 @@
  * @subpackage	Libraries
  * @category	Library
  * @author		Justin Kimbrell
- * @copyright	Copyright (c) 2011, Justin Kimbrell
+ * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/libraries/channel_data
- * @version		0.6.0
- * @build		20111228
+ * @version		0.6.3
+ * @build		20120125
  */
 
 if(!class_exists('Channel_data_lib'))
@@ -23,7 +23,7 @@ if(!class_exists('Channel_data_lib'))
 		
 		// A list of escaped conditional operators
 		
-		private $conditionals = array('\!\=', '\<\=', '\>\=', '\<', '\>', '\=');
+		private $conditionals = array('\!\=', '\<\=', '\>\=', '\<', '\>', '\=', 'like', 'LIKE');
 		
 		// A list of common ambitious fields
 		
@@ -474,10 +474,88 @@ if(!class_exists('Channel_data_lib'))
 		 */
 		 
 		public function get_field_by_name($field_name, $select = array('*'))
-		{
-			return $this->get_fields($select, array('field_name' => $field_name));
+		{			
+			return $this->get_fields(array(
+				'select' 	=> $select,
+				'where'		=> array(
+					'field_name' => $field_name
+				)
+			));
+		}
+		
+		/**
+		 * Get a custom field by specifying a field_name.
+		 *
+		 * @access	public
+		 * @param	mixed
+		 * @param	mixed
+		 * @param	mixed
+		 * @param	mixed
+		 * @param	mixed
+		 * @param	mixed
+		 * @return	object
+		 */
+		 
+		public function get_fields_by_group($group_id = FALSE, $select = array('*'), $where = array(), $order_by = 'field_id', $sort = 'DESC', $limit = FALSE, $offset = 0)
+		{		
+		
+			if($this->is_polymorphic($select))
+			{
+				$select['where']['group_id'] = $group_id;
+			}
+			else
+			{
+				$where['group_id'] = $group_id;
+			}
+			
+			return $this->get_fields($select, $where, $order_by, $sort, $limit, $offset);
 		}
 	 
+		/**
+		 * Alias to the get_fields_by_group method
+		 *
+		 * @access	public
+		 * @param	mixed
+		 * @param	mixed
+		 * @param	mixed
+		 * @param	mixed
+		 * @param	mixed
+		 * @param	mixed
+		 * @return	object
+		 */
+		 
+		public function get_field_group($group_id, $select = array('*'), $where = array(), $order_by = 'group_id', $sort = 'DESC', $limit = FALSE, $offset = 0)
+		{
+			if($this->is_polymorphic($select))
+			{
+				$select['where']['group_id'] = $group_id;
+			}
+			else
+			{
+				$where['group_id'] = $group_id;
+			}
+			
+			return $this->get_field_groups($select, $where, $order_by, $sort, $limit, $offset);
+		}
+		
+		/**
+		 * Gets all the field groups
+		 *
+		 * @access	public
+		 * @param	mixed
+		 * @param	mixed
+		 * @param	mixed
+		 * @param	mixed
+		 * @param	mixed
+		 * @param	mixed
+		 * @return	object
+		 */
+		 
+		public function get_field_groups($select = array('*'), $where = array(), $order_by = 'group_id', $sort = 'DESC', $limit = FALSE, $offset = 0)
+		{
+			return $this->get('field_groups', $select, $where, $order_by, $sort, $limit, $offset);
+		}
+		
 		/**
 		 * Get channel member groups by either a group_id or channel_id
 		 *
@@ -778,7 +856,7 @@ if(!class_exists('Channel_data_lib'))
 			return $this->get_members(array(
 				'select' 	=> $select,
 				'where'		=> array(
-					'member_id' => $member_id
+					'members.member_id' => $member_id
 				)
 			));
 		}
@@ -1177,9 +1255,17 @@ if(!class_exists('Channel_data_lib'))
 		 
 		public function get_statuses_by_group($group_id, $select = '*', $where = array(), $order_by = 'status_id', $sort = 'DESC', $limit = FALSE, $offset = 0)
 		{
-			return $this->get_statuses($select, array_merge($where, array(
-				'group_id' => $group_id
-			)), $order_by, $sort, $limit, $offset);
+			
+			if($this->is_polymorphic($select))
+			{
+				$select['where']['group_id'] = $group_id;
+			}
+			else
+			{
+				$where['group_id'] = $group_id;
+			}
+			
+			return $this->get_statuses($select, $where, $order_by, $sort, $limit, $offset);
 		}
 		
 		/**
@@ -1320,16 +1406,6 @@ if(!class_exists('Channel_data_lib'))
 								
 									$concat = ' AND ';
 									
-									/*
-									if($where_field == 'or author_idz')
-									{
-										echo 'match: ';
-										var_dump(preg_match("/^or.+/", $where_field));
-										exit();
-									
-									}
-									*/
-									
 									if(preg_match("/^or.+/", $where_field))
 									{			
 										unset($params['where'][$field]);
@@ -1339,7 +1415,7 @@ if(!class_exists('Channel_data_lib'))
 										$where_field 	= trim(str_replace("or ", '', $field));
 										$concat 		= ' OR ';									
 									}
-									
+																		
 									$where_sql[] =  $concat . $this->remove_conditionals($this->EE->db->protect_identifiers($where_field)) . $this->assign_conditional($where_field) . '\'' . $where_val . '\'';
 										
 								}
@@ -1424,10 +1500,11 @@ if(!class_exists('Channel_data_lib'))
 				{
 					$match = TRUE;
 					$return = $condition;
+					
 					break;
 				}
 			}		
-		
+					
 			if(!$match) $return = $conditionals[count($conditionals) - 1];
 					
 			return ' '.str_replace('\\', '', $return).' ';
