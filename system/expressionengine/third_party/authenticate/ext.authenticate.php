@@ -7,8 +7,8 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/authenticate
- * @version		1.0.1
- * @build		20120207
+ * @version		1.0.2
+ * @build		20120210
  */
  
 class Authenticate_ext {
@@ -17,7 +17,7 @@ class Authenticate_ext {
     public $version        	= '1.0';
     public $description    	= '';
     public $settings_exist 	= 'n';
-  	public $docs_url       	= 'http://www.objectivehtml.com/authentication/documentation';
+  	public $docs_url       	= 'http://www.objectivehtml.com/authenticate/documentation';
 	public $settings 		= array();
 	public $required_by 	= array('module');
 			

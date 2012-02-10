@@ -7,8 +7,8 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/authenticate
- * @version		1.0.1
- * @build		20120207
+ * @version		1.0.2
+ * @build		20120210
  */
  
 class Authenticate {
@@ -133,6 +133,18 @@ class Authenticate {
 	public function forgot_password()
 	{
 		return $this->forgot_password_form();
+	}
+	
+	public function logout_url()
+	{
+		$return = $this->param('return', FALSE);
+		
+		if($return)
+		{
+			$return = '&return='.urlencode($return);
+		}
+		
+		return '{path="LOGOUT"}'.($return ? $return : NULL);
 	}
 	
 	private function parse($vars, $tagdata = FALSE)

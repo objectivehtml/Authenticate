@@ -1,13 +1,18 @@
 /**
 * Authenticate
 * Author: Objective HTML (Justin Kimbrell)
-* Version: 1.0
-* Build: 20120204
+* Version: 1.0.2
+* Build: 20120210
 * Copyright 2012 - All rights reserved
 * http://objectivehtml.com
 */
 
-Version 1.0.1 - 02/02/2012
+Version 1.0.2 - 02/10/2012
+------------------------
+Fixed incorrect link to documentation and added the {exp:authenticatelogout_url} tag
+
+
+Version 1.0.1 - 02/05/2012
 ------------------------
 Minor bug fixes. Removed dependency to table_model.php in favor the Data_forge.php library.
 

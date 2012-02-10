@@ -105,6 +105,12 @@ Forgot Password
 		
 	{/exp:authenticate:forgot_password}
 
+Logout URL
+----------
+
+{exp:authenticate:logout_url}
+{exp:authenticate:logout_url return="/some/return/url"}
+	
 License
 -------
 Channel Data is licensed using the BSD 2-Clause License. In a nutshell, do whatever you want with it so long as you leave the copyright information and don't take credit for my work. The idea is for everyone to benefit from the library. For a full copy of the license, refer to license.txt in the download package.

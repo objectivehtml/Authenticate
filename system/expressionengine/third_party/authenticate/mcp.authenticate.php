@@ -7,8 +7,8 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/authenticate
- * @version		1.0.1
- * @build		20120207
+ * @version		1.0.2
+ * @build		20120210
  */
  
 require 'libraries/Email_Template.php';
