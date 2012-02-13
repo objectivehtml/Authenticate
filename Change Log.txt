@@ -1,11 +1,16 @@
 /**
 * Authenticate
 * Author: Objective HTML (Justin Kimbrell)
-* Version: 1.0.2
-* Build: 20120210
+* Version: 1.0.3
+* Build: 20120212
 * Copyright 2012 - All rights reserved
 * http://objectivehtml.com
 */
+
+Version 1.0.3 - 02/12/2012
+------------------------
+Bug fixes that prevented form action from working correctly in rare cases
+
 
 Version 1.0.2 - 02/10/2012
 ------------------------

@@ -10,7 +10,7 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/libraries/base_form
- * @version		1.1.5
+ * @version		1.1.6
  * @build		20120208
  */
 
@@ -180,7 +180,7 @@ if(!class_exists('Base_form'))
 			$this->EE->load->helper('form');
 			$this->EE->load->helper('url');
 			
-			if(!preg_match("/(http|https|ftp|ftps)\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/\S*)?/", $this->action, $mathes))
+			if(!preg_match("/(http|https|ftp|ftps)\:\/\/?/", $this->action, $mathes))
 			{
 				$this->action = rtrim($this->current_url(FALSE), '/') . '/' . ltrim($this->action, '/');
 			}
