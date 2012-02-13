@@ -5,13 +5,12 @@
  *
  * A class that easily allows developers to create EE form tags.
  * 
- * @package		Authenticate
  * @subpackage	Libraries
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/libraries/base_form
- * @version		1.1.6
- * @build		20120208
+ * @version		1.1.7
+ * @build		20120212
  */
 
 if(!class_exists('Base_form'))
@@ -44,7 +43,7 @@ if(!class_exists('Base_form'))
 			$this->tagdata 	= $this->EE->TMPL->tagdata;
 		}
 		
-		public function open($hidden_fields = array())
+		public function open($hidden_fields = array(), $fields = FALSE, $entry = FALSE)
 		{		
 			$this->action			= empty($this->action) ? $this->param('action', $this->return) : $this->action;
 		
@@ -54,7 +53,8 @@ if(!class_exists('Base_form'))
 			$this->id				= $this->param('id', $this->id);
 			$this->name				= $this->param('name', $this->name);
 			$this->prefix			= $this->param('prefix', $this->prefix);
-			$this->required 		= explode('|', $this->param('required', $this->required));
+			$this->required 		= $this->param('required', $this->required);
+			$this->required			= $this->required ? explode('|', $this->required) : FALSE;
 			$this->rules 			= $this->param('rules', $this->rules);
 			$this->return 			= $this->param('return', $this->return);
 			$this->secure_action 	= $this->param('secure_action', $this->secure_action, TRUE);
@@ -143,9 +143,14 @@ if(!class_exists('Base_form'))
 					$post_vars['post:'.$post_field] = NULL;
 				}
 			}
-						
+					
+			if($fields && $entry)
+			{
+				$this->tagdata = $this->parse_fields($fields, $entry);				
+			}
+					
 			$this->tagdata = $this->parse(array($post_vars));
-			
+					
 			$errors = array();
 			
 			if(count($this->field_errors) > 0)
@@ -210,39 +215,49 @@ if(!class_exists('Base_form'))
 			$this->field_errors[$field] = $message;
 		}
 		
-		public function parse_fields($field_data, $entry_data)
+		public function parse_fields($field_data, $entry_data, $prefix = '')
 		{
-			$entry_data = isset($entry_data[0]) ? $entry_data[0] : array();
-			
-			$vars = array();
-			
-			foreach($field_data->result() as $index => $row)
+			if(!isset($entry_data[0]))
 			{
-				$field_name 		= $row->field_name;
-				$field_label 		= $row->field_label;
-				$field_instructions	= $row->field_instructions;
-				$field_type			= $row->field_type;
+				$entry_array = array($entry_data);
+			}
+			else
+			{
+				$entry_array = $entry_data;
+			}
+			
+			foreach($entry_array as $entry_data)
+			{
+				$vars = array();
 				
-				$vars[0][$field_name] = isset($entry_data[$row->field_name]) ? $entry_data[$row->field_name] : NULL;
-				$vars[0]['label:'.$field_name] = $field_label;
-				$vars[0]['instructions:'.$field_name] = $field_instructions;
-				$vars[0]['type:'.$field_name] = $field_type;
-				
-				if(!empty($row->field_list_items))
+				foreach($field_data as $index => $row)
 				{
-					foreach(explode("\n", $row->field_list_items) as $option_index => $option)
+					$field_name 		= $row['field_name'];
+					$field_label 		= $row['field_label'];
+					$field_instructions	= $row['field_instructions'];
+					$field_type			= $row['field_type'];
+					
+					$vars[0][$field_name] = isset($entry_data[$prefix.$field_name]) ? $entry_data[$prefix.$field_name] : NULL;			
+					$vars[0]['label:'.$field_name] = $field_label;
+					$vars[0]['instructions:'.$field_name] = $field_instructions;
+					$vars[0]['type:'.$field_name] = $field_type;
+					
+					if(!empty($row['field_list_items']))
 					{
-						$vars[0]['options:'.$row->field_name][$option_index] = array(
-							'option_value'	=> $option,
-							'option_name' 	=> $option,
-							'selected'		=> $vars[0][$row->field_name] == $option ? 'selected="selected"' : NULL,
-							'checked'		=> $vars[0][$row->field_name] == $option ? 'checked="checked"' : NULL
-						);
+						foreach(explode("\n", $row['field_list_items']) as $option_index => $option)
+						{
+							$vars[0]['options:'.$field_name][$option_index] = array(
+								'option_value'	=> $option,
+								'option_name' 	=> $option,
+								'selected'		=> $vars[0][$field_name] == $option ? 'selected="selected"' : NULL,
+								'checked'		=> $vars[0][$field_name] == $option ? 'checked="checked"' : NULL
+							);							
+						}
 					}
 				}
 			}
-				
-			return $this->EE->TMPL->parse_variables(trim($this->EE->TMPL->tagdata), $vars);
+			
+			return $this->parse($vars);
 		}
 				
 		public function validate($required_fields = array(), $additional_rules = array())
@@ -318,15 +333,17 @@ if(!class_exists('Base_form'))
 			$base_url = (!empty($_SERVER['HTTPS'])) ? 'https://'.$_SERVER['SERVER_NAME'] : 'http://'.$_SERVER['SERVER_NAME'];
 			$uri	  = '';
 			
+			$port = $_SERVER['SERVER_PORT'] == "80" ? NULL : ':' . $_SERVER['SERVER_PORT'];
+			
 			if($uri_segments)
 			{
 				$uri = '/' . implode('/', $segments);
 			}
 			
-			return $base_url . $uri;
+			return $base_url . $port . $uri;
 		}
 		
-		private function parse($vars, $tagdata = FALSE)
+		public function parse($vars, $tagdata = FALSE)
 		{
 			if($tagdata === FALSE)
 			{
@@ -336,7 +353,7 @@ if(!class_exists('Base_form'))
 			return $this->EE->TMPL->parse_variables($tagdata, $vars);
 		}
 		
-		private function param($param, $default = FALSE, $boolean = FALSE, $required = FALSE)
+		public function param($param, $default = FALSE, $boolean = FALSE, $required = FALSE)
 		{
 			$name	= $param;
 			$param 	= $this->EE->TMPL->fetch_param($param);
