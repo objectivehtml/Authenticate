@@ -7,34 +7,20 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/authenticate
- * @version		1.0.4
- * @build		20120212
+ * @version		1.0.5
+ * @build		20120213
  */
  
 class Authenticate_upd {
 
-    public $version = '1.0.4';
+    public $version = '1.0.5';
 	public $mod_name;
 	public $ext_name;
 	public $mcp_name;
 	
-	private $tables = array(
-		/*
-		'table_name' => array(
-			'key' => 'value'
-		)
-		*/
-	);
-	
-	private $actions = array(
-		/*
-		array(
-		    'class'     => '',
-		    'method'    => ''
-		)
-		*/
-	);
-	
+	private $tables  = array();	
+	private $actions = array();
+		
 	private $hooks = array(
 		array('member_member_logout', 'member_member_logout')
 	);
@@ -90,6 +76,9 @@ class Authenticate_upd {
 	
 	public function update($current = '')
 	{
+		$this->EE->db->where('class', $this->ext_name);
+		$this->EE->db->update('extensions', array('version' => $this->version));
+		
 	    return TRUE;
 	}
 	

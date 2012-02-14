@@ -7,8 +7,8 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/authenticate
- * @version		1.0.4
- * @build		20120212
+ * @version		1.0.5
+ * @build		20120213
  */
  
 class Authenticate {
@@ -41,7 +41,7 @@ class Authenticate {
 				$auth->remember_me(60*60*24*182);
 				$auth->start_session();
 				
-				return $this->EE->base_form->redirect();
+				return $this->EE->base_form->redirect($auth->member('group_id'));
 			}
 			else
 			{

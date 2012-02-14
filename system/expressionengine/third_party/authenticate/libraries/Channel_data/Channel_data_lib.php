@@ -13,8 +13,8 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/libraries/channel_data
- * @version		0.6.3
- * @build		20120125
+ * @version		0.6.5
+ * @build		20120211
  */
 
 if(!class_exists('Channel_data_lib'))
@@ -37,7 +37,7 @@ if(!class_exists('Channel_data_lib'))
 		
 		private $reserved_terms = array(
 			'select', 'like', 'or_like', 'or_where', 'where', 'where_in', 
-			'order_by', 'sort', 'limit', 'offset'
+			'order_by', 'sort', 'limit', 'offset', 'join', 'having', 'group_by'
 		);
 			
 		/**
@@ -758,13 +758,12 @@ if(!class_exists('Channel_data_lib'))
 			
 		public function get_channel_entries($channel_id, $select = array(), $where = array(), $order_by = 'channel_titles.channel_id', $sort = 'DESC', $limit = FALSE, $offset = 0, $debug = FALSE)
 		{		
-		
-			//Default fields to select
-						
-			$default_select = array('channel_data.entry_id', 'channel_data.channel_id', 'channel_titles.author_id', 'channel_titles.title', 'channel_titles.url_title', 'channel_titles.entry_date', 'channel_titles.expiration_date', 'status');
+			
+			$default_select = array('channel_data.entry_id', 'channel_data.channel_id', 'channel_titles.author_id', 'channel_titles.title', 'channel_titles.url_title', 'channel_titles.entry_date', 'channel_titles.expiration_date', 'status');							
+			$default_select = ($select == array()) ? $default_select : (isset($select['select']) ? $select['select'] : $default_select);
 			
 			// If the parameter is polymorphic, then the variables are extracted
-			
+		
 			if($this->is_polymorphic($select) && $polymorphic = $select)
 			{
 				extract($select);
@@ -776,10 +775,15 @@ if(!class_exists('Channel_data_lib'))
 						if($term == 'select' && !isset($$term['select']))
 							$$term = $default_select;
 						else
-							$$term = isset($polymorphic[$term]) ? $polymorphic[$term] : $$term;
-						
+							$$term = isset($polymorphic[$term]) ? $polymorphic[$term] : $$term;						
 					}
 				}
+			}
+			
+				
+			if(count($select) == 0)
+			{
+				$select = $default_select;
 			}
 			
 			// If the channel_id is not false then only the specified channel fields are
@@ -833,6 +837,14 @@ if(!class_exists('Channel_data_lib'))
 				'offset'	=> $offset
 			);
 			
+			foreach(array('join', 'having', 'group_by') as $keyword)
+			{
+				if(isset($$keyword))
+				{
+					$params[$keyword] = $$keyword;
+				}
+			}
+						
 			// Converts the params into active record methods
 			
 			$this->convert_params($params, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE);
@@ -1286,6 +1298,31 @@ if(!class_exists('Channel_data_lib'))
 		{
 			return $this->get('statuses', $select, $where, $order_by, $sort, $limit, $offset);
 		}
+				
+		/**
+		 * Return TRUE if category is a parent.
+		 *
+		 * @access	public
+		 * @param	int		Category id
+		 * @return  bool
+		 */
+		 
+		public function is_parent_category($cat_id)
+		{
+			$category = $this->get_category($cat_id);
+			
+			if($category->num_rows() == 0)
+			{
+				return FALSE;
+			}
+			
+			if($category->row('parent_id') == 0)
+			{
+				return TRUE;
+			}
+			
+			return FALSE;
+		}
 		
 		/**
 		 * Adds a set prefix to an ambigious database field
@@ -1344,16 +1381,18 @@ if(!class_exists('Channel_data_lib'))
 		 */
 		 
 		public function convert_params($select, $where, $order_by, $sort, $limit, $offset, $debug = FALSE)
-		{			
+		{		
 			if($this->is_polymorphic($select))
 			{
 				$subject = $select;
 				unset($select);
 				
-				$keywords = array('where', 'order_by', 'sort', 'limit', 'offset');
+				$keywords = $this->reserved_terms;
 				
 				foreach($keywords as $keyword)
-					$$keyword = isset($subject[$keyword]) ? $subject[$keyword] : $$keyword;
+				{
+					$$keyword = isset($subject[$keyword]) ? $subject[$keyword] : (isset($$keyword) ? $$keyword : NULL);
+				}
 				
 				if(isset($subject['select']))
 					$select = $subject['select'];
@@ -1370,26 +1409,37 @@ if(!class_exists('Channel_data_lib'))
 				'limit'		=> $limit,
 				'offset'	=> $offset
 			);
-					
+			
+			foreach(array('join', 'having', 'group_by') as $keyword)
+			{
+				if(isset($$keyword))
+				{
+					$params[$keyword] = $$keyword;
+				}
+			}
+						
 			foreach($this->reserved_terms as $term)
 			{
 				if(isset($params[$term]) && $params[$term] !== FALSE)
 				{
 					$param = $params[$term];
-						
+					
 					switch ($term)
 					{
 						case 'select':
 						
+							
 							if(!is_array($param))
 								$param = array($param); 
 							
+												
 							foreach($param as $select)
 							{
 								//$select = $this->check_ambiguity($select);
 								
 								$this->EE->db->select($select);
 							}
+							
 							
 							break;
 							
@@ -1423,7 +1473,7 @@ if(!class_exists('Channel_data_lib'))
 							 
 							$sql = trim(implode(' ', $where_sql));			
 							$sql = trim(ltrim(ltrim($sql, 'AND'), 'OR'));
-										
+							
 							if(!empty($sql)) $this->EE->db->where($sql, FALSE, FALSE);
 							
 							break;
@@ -1451,6 +1501,39 @@ if(!class_exists('Channel_data_lib'))
 							foreach($param as $param)							
 								$this->EE->db->limit($param, $offset);
 							
+							
+							break;
+							
+						case 'join':
+						
+							if(is_array($param))
+							{
+								foreach($param as $table => $on)
+								{
+									$this->EE->db->join($table, $on);
+								}
+							}
+							
+							break;
+							
+						case 'having':
+						
+							if(is_array($param))
+							{
+								foreach($param as $field => $value)
+								{
+									$this->EE->db->having($field, $value);
+								}
+							}
+							
+							break;
+							
+						case 'group_by':
+						
+							if(is_string($param))
+							{
+								$this->EE->db->group_by($param);
+							}
 							
 							break;
 					}

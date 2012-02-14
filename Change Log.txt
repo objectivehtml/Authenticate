@@ -1,11 +1,16 @@
 /**
 * Authenticate
 * Author: Objective HTML (Justin Kimbrell)
-* Version: 1.0.3
-* Build: 20120212
+* Version: 1.0.5
+* Build: 20120213
 * Copyright 2012 - All rights reserved
 * http://objectivehtml.com
 */
+
+Version 1.0.5 - 02/12/2012
+------------------------
+Add a new parameter to dynamically redirect specific member groups
+
 
 Version 1.0.3 - 02/12/2012
 ------------------------
