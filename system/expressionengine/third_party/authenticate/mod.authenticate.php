@@ -7,8 +7,8 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/authenticate
- * @version		1.0.5
- * @build		20120213
+ * @version		1.0.6
+ * @build		20120224
  */
  
 class Authenticate {

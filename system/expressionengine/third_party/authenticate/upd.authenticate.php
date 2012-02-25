@@ -7,13 +7,13 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/authenticate
- * @version		1.0.5
- * @build		20120213
+ * @version		1.0.6
+ * @build		20120224
  */
  
 class Authenticate_upd {
 
-    public $version = '1.0.5';
+    public $version = '1.0.6';
 	public $mod_name;
 	public $ext_name;
 	public $mcp_name;

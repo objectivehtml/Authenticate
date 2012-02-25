@@ -1,11 +1,15 @@
 /**
 * Authenticate
 * Author: Objective HTML (Justin Kimbrell)
-* Version: 1.0.5
-* Build: 20120213
+* Version: 1.0.6
+* Build: 20120224
 * Copyright 2012 - All rights reserved
 * http://objectivehtml.com
 */
+
+Version 1.0.6 - 02/24/2012
+--------------------------
+Added a two new parameters to make redirecting easier and more dynamic. return_var and return_segment have been added.
 
 Version 1.0.5 - 02/12/2012
 ------------------------
