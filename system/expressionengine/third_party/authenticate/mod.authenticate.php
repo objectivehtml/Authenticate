@@ -7,7 +7,7 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/authenticate
- * @version		1.0.7
+ * @version		1.0.8
  * @build		20120301
  */
  
@@ -89,6 +89,8 @@ class Authenticate {
 		
 	function forgot_password_form()
 	{
+		$this->EE->load->library('Base_form');
+		
 		$email_field = $this->param('email_field', 'email');
 		
 		$this->EE->base_form->validate();

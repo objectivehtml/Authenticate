@@ -1,11 +1,15 @@
 /**
 * Authenticate
 * Author: Objective HTML (Justin Kimbrell)
-* Version: 1.0.7
+* Version: 1.0.8
 * Build: 20120301
 * Copyright 2012 - All rights reserved
 * http://objectivehtml.com
 */
+
+Version 1.0.8 - 03/01/2012
+--------------------------
+Fixed a bug caused by the code refactoring of v1.0.7 that broke the forgot password tag. (Base_form was undefined)
 
 Version 1.0.7 - 03/01/2012
 --------------------------
