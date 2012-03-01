@@ -1,11 +1,15 @@
 /**
 * Authenticate
 * Author: Objective HTML (Justin Kimbrell)
-* Version: 1.0.6
-* Build: 20120224
+* Version: 1.0.7
+* Build: 20120301
 * Copyright 2012 - All rights reserved
 * http://objectivehtml.com
 */
+
+Version 1.0.7 - 03/01/2012
+--------------------------
+Updated Channel Data dependency. Fixed a bug that prevent login and logout methods from working in the same template.
 
 Version 1.0.6 - 02/24/2012
 --------------------------

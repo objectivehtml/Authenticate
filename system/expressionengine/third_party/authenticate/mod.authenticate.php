@@ -7,8 +7,8 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/authenticate
- * @version		1.0.6
- * @build		20120224
+ * @version		1.0.7
+ * @build		20120301
  */
  
 class Authenticate {
@@ -17,14 +17,15 @@ class Authenticate {
 	{
 		$this->EE =& get_instance();
 		
-		$this->EE->lang->loadfile('authenticate');	
-		$this->EE->load->library('Base_form');
+		$this->EE->lang->loadfile('authenticate');
 		$this->EE->load->library('authenticate_lib');
 		$this->EE->load->driver('channel_data');	
 	}
 	
 	public function login_form()
-	{
+	{	
+		$this->EE->load->library('Base_form');
+		
 		$username_field = $this->param('username_field', 'username');
 		$password_field = $this->param('password_field', 'password');
 		$auth_type		= $this->param('auth_type', 'username');
@@ -72,6 +73,7 @@ class Authenticate {
 			$rule = 'required|trim';
 		}
 		
+		$this->EE->base_form->TMPL = $this->EE->TMPL->tagdata;
 		$this->EE->base_form->set_rule($username_field, $rule);
 		$this->EE->base_form->set_rule($password_field, 'required|trim');
 		

@@ -7,14 +7,14 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/authenticate
- * @version		1.0.6
- * @build		20120224
+ * @version		1.0.7
+ * @build		20120301
  */
  
 class Authenticate_ext {
 
     public $name       		= 'Authenticate';
-    public $version        	= '1.0.6';
+    public $version        	= '1.0.7';
     public $description    	= '';
     public $settings_exist 	= 'n';
   	public $docs_url       	= 'http://www.objectivehtml.com/authenticate/documentation';
