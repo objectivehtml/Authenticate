@@ -9,7 +9,7 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/libraries/base_form
- * @version		1.2.1
+ * @version		1.2.2
  * @build		20120413
  */
 
@@ -124,6 +124,7 @@ if(!class_exists('Base_form'))
 				'required' 		=> $this->required,
 				'secure_return' => $this->secure_return,
 				'ajax_response'	=> $this->ajax_response ? 'y' : 'n',
+				'base_form_submit' => TRUE,
 				'return'		=> $this->return
 			));
 			
@@ -312,43 +313,46 @@ if(!class_exists('Base_form'))
 				
 		public function validate($required_fields = array(), $additional_rules = array())
 		{
-			$vars = array();
-			
-			$this->EE->load->library('form_validation');
-			$this->EE->form_validation->set_error_delimiters('', '');
-			
-			$validate_fields = isset($_POST['required']) ? $_POST['required'] : $this->required;
-			$validate_fields = !is_array($validate_fields) ? explode('|', $validate_fields) : $validate_fields;
-			
-			$required_fields = array_merge($required_fields, $validate_fields);
-			
-			foreach($required_fields as $field)
-			{
-				$this->EE->form_validation->set_rules($field, ucwords(str_replace(array('-', '_'), ' ', $field)), 'trim|required');
-			}
-			
-			$rules = array_merge((isset($_POST['rule']) ? $_POST['rule'] : array()), $this->rules);
-			
-			foreach($rules as $field => $rule)
-			{
-				$label = ucwords(str_replace(array('_'), ' ', $field));
+			if(isset($_POST['base_form_submit']))
+				{
+				$vars = array();
 				
-				$required_fields = array_merge(array($field), $required_fields);
+				$this->EE->load->library('form_validation');
+				$this->EE->form_validation->set_error_delimiters('', '');
 				
-				$this->EE->form_validation->set_rules($field, $label, $rule);
-			}
-			
-			if ($this->EE->form_validation->run() == FALSE)
-			{
-				$error_count = 0;	
+				$validate_fields = isset($_POST['required']) ? $_POST['required'] : $this->required;
+				$validate_fields = !is_array($validate_fields) ? explode('|', $validate_fields) : $validate_fields;
+				
+				$required_fields = array_merge($required_fields, $validate_fields);
 				
 				foreach($required_fields as $field)
-				{		
-					$error = form_error($field);
-							
-					if($error !== FALSE && !empty($error))
-					{	
-						$this->set_field_error($field, $error);
+				{
+					$this->EE->form_validation->set_rules($field, ucwords(str_replace(array('-', '_'), ' ', $field)), 'trim|required');
+				}
+				
+				$rules = array_merge((isset($_POST['rule']) ? $_POST['rule'] : array()), $this->rules);
+				
+				foreach($rules as $field => $rule)
+				{
+					$label = ucwords(str_replace(array('_'), ' ', $field));
+					
+					$required_fields = array_merge(array($field), $required_fields);
+					
+					$this->EE->form_validation->set_rules($field, $label, $rule);
+				}
+				
+				if ($this->EE->form_validation->run() == FALSE)
+				{
+					$error_count = 0;	
+					
+					foreach($required_fields as $field)
+					{		
+						$error = form_error($field);
+								
+						if($error !== FALSE && !empty($error))
+						{	
+							$this->set_field_error($field, $error);
+						}
 					}
 				}
 			}

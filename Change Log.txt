@@ -7,6 +7,10 @@
 * http://objectivehtml.com
 */
 
+Version 1.1.1 - 04/13/2012
+--------------------------
+- Fixed a compatibility issue when inline_errors handling is used with Safecracker on the same page.
+
 Version 1.1.0 - 04/13/2012
 --------------------------
 - Fixed a number a bugs that caused issues if multiple login forms were on the same page.
