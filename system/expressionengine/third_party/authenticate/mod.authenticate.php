@@ -7,8 +7,8 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/authenticate
- * @version		1.0.8
- * @build		20120301
+ * @version		1.1.0
+ * @build		20120413
  */
  
 class Authenticate {
@@ -34,7 +34,8 @@ class Authenticate {
 		{
 			$auth_user = $this->EE->input->post($username_field);
 			$auth_pass = $this->EE->input->post($password_field);
-			
+			$ajax	   = $this->EE->input->post('ajax_response') == 'y' ? TRUE : FALSE;
+			 
 			$auth = $this->EE->authenticate_lib->login($auth_user, $auth_pass, $auth_type);
 			
 			if($auth !== FALSE)
@@ -42,11 +43,23 @@ class Authenticate {
 				$auth->remember_me(60*60*24*182);
 				$auth->start_session();
 				
-				return $this->EE->base_form->redirect($auth->member('group_id'));
+				if(!$ajax)
+				{
+					return $this->EE->base_form->redirect($auth->member('group_id'));
+				}
+				else
+				{
+					$this->EE->output->send_ajax_response(array('success' => TRUE));
+				}
 			}
 			else
 			{
 				$this->EE->base_form->validate();
+				
+				$response = array(
+					'success' => FALSE,
+					'errors'  => array()
+				);
 				
 				if(count($this->EE->base_form->field_errors) == 0)
 				{
@@ -58,6 +71,19 @@ class Authenticate {
 					{
 						$this->EE->base_form->set_error(lang('authenticate_failed_message_email'));
 					}
+					
+					$response['error_type'] = 'auth';
+					$response['errors'] = (array) $this->EE->base_form->errors;
+				}
+				else
+				{
+					$response['error_type'] = 'field';
+					$response['errors'] = (array) $this->EE->base_form->field_errors;
+				}
+				
+				if($ajax)
+				{
+					$this->EE->output->send_ajax_response($response);
 				}
 			}
 		}
@@ -73,7 +99,8 @@ class Authenticate {
 			$rule = 'required|trim';
 		}
 		
-		$this->EE->base_form->TMPL = $this->EE->TMPL->tagdata;
+		$this->EE->base_form->clear();
+		$this->EE->base_form->tagdata = $this->EE->TMPL->tagdata;
 		$this->EE->base_form->set_rule($username_field, $rule);
 		$this->EE->base_form->set_rule($password_field, 'required|trim');
 		

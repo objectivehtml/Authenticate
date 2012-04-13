@@ -1,7 +1,7 @@
 Authenticate
 ============
 
-### Version 1.0.7 - 20120301
+### Version 1.1.0 - 20120413
 
 #### By Objective HTML / Justin Kimbrell
 

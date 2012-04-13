@@ -1,11 +1,18 @@
 /**
 * Authenticate
 * Author: Objective HTML (Justin Kimbrell)
-* Version: 1.0.8
-* Build: 20120301
+* Version: 1.1.0
+* Build: 20120413
 * Copyright 2012 - All rights reserved
 * http://objectivehtml.com
 */
+
+Version 1.1.0 - 04/13/2012
+--------------------------
+- Fixed a number a bugs that caused issues if multiple login forms were on the same page.
+- Added ability to submit a login form with ajax.
+- Fixed a long time bug causing the form action to be incorrect.
+- Updated Channel Data dependency
 
 Version 1.0.8 - 03/01/2012
 --------------------------

@@ -7,11 +7,12 @@
  *
  * @package		Channel Data
  * @subpackage	Libraries
- * @category	Drivers
+ * @category	Library
  * @author		Justin Kimbrell
- * @link		http://www.objectivehtml.com/libraries/channel_data
- * @version		0.6.5
- * @build		20120211
+ * @copyright	Copyright (c) 2012, Justin Kimbrell
+ * @link 		http://www.objectivehtml.com/libraries/channel_data
+ * @version		0.6.9
+ * @build		20120405
  */
  
 class Channel_data_utility {
@@ -30,25 +31,65 @@ class Channel_data_utility {
 	 {
 	 	$new_data = array();
 	 	
-	 	foreach($data as $data_index => $data_value)
+	 	if(!empty($prefix))
 	 	{
-	 		if(is_array($data_value))
-	 		{
-	 			$new_row = array();
-	 			
-	 			foreach($data_value as $inner_index => $inner_value)
-	 			{
-	 				$new_row[$prefix . $delimeter . $inner_index] = $inner_value;
-	 			}
-	 			
-	 			$new_data[$data_index] = $new_row;
-	 		}
-	 		else
-	 		{
-	 			$new_data[$prefix . $delimeter . $data_index] = $data_value;
-	 		}
+		 	foreach($data as $data_index => $data_value)
+		 	{
+		 		if(is_array($data_value))
+		 		{
+		 			$new_row = array();
+		 			
+		 			foreach($data_value as $inner_index => $inner_value)
+		 			{
+		 				$new_row[$prefix . $delimeter . $inner_index] = $inner_value;
+		 			}
+		 			
+		 			$new_data[$data_index] = $new_row;
+		 		}
+		 		else
+		 		{
+		 			$new_data[$prefix . $delimeter . $data_index] = $data_value;
+		 		}
+		 	}
+	 	}
+	 	else
+	 	{
+	 		$new_data = $data;
 	 	}
 	 	
 	 	return $new_data;	
-	 }	
+	 }
+
+	/**
+	 * Merge an array to any nested array. Useful for merging data into arrays
+	 * before they are used to parse the templates.
+	 *
+	 * @access	public
+	 * @param	array	The array to merge
+	 * @param	array	The subject and data to be returned
+	 * @param	string	The starting point
+	 * @param	string	The ending point
+	 * @return	array
+	 */
+	 public function merge_array($array, $subject, $start = 0, $stop = FALSE)
+	 {
+	 	if($stop === FALSE)
+	 	{
+	 		$stop = count($subject);
+	 	}
+
+	 	for($y=$start; $y < $stop; $y++)
+	 	{
+	 		if(isset($subject[$y]))
+	 		{
+	 			$subject[$y] = array_merge($subject[$y], $array);
+	 		}
+	 		else
+	 		{	
+	 			$subject[$y] = $array;
+	 		}
+	 	}
+
+	 	return $subject;
+	 }
 }

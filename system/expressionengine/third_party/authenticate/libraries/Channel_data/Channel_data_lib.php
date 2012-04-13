@@ -13,8 +13,8 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/libraries/channel_data
- * @version		0.6.5
- * @build		20120211
+ * @version		0.6.9
+ * @build		20120405
  */
 
 if(!class_exists('Channel_data_lib'))
@@ -754,11 +754,10 @@ if(!class_exists('Channel_data_lib'))
 		 * @param	mixed
 		 * @param	mixed
 		 * @return	object
-		 */
-			
+		 */	
 		public function get_channel_entries($channel_id, $select = array(), $where = array(), $order_by = 'channel_titles.channel_id', $sort = 'DESC', $limit = FALSE, $offset = 0, $debug = FALSE)
 		{		
-			
+		
 			$default_select = array('channel_data.entry_id', 'channel_data.channel_id', 'channel_titles.author_id', 'channel_titles.title', 'channel_titles.url_title', 'channel_titles.entry_date', 'channel_titles.expiration_date', 'status');							
 			$default_select = ($select == array()) ? $default_select : (isset($select['select']) ? $select['select'] : $default_select);
 			
@@ -779,7 +778,6 @@ if(!class_exists('Channel_data_lib'))
 					}
 				}
 			}
-			
 				
 			if(count($select) == 0)
 			{
@@ -788,15 +786,17 @@ if(!class_exists('Channel_data_lib'))
 			
 			// If the channel_id is not false then only the specified channel fields are
 			// appended to the query. Otherwise, all fields are appended.
-			
+				
+			$where_array = array('channel_data.channel_id' => $channel_id);
+				
 			if($channel_id !== FALSE)
 			{
 				$fields	 = $this->get_channel_fields($channel_id)->result();
 				
 				if(is_array($where))
-					$where	 = array_merge(array('channel_data.channel_id' => $channel_id), $where);
+					$where_array = array_merge($where_array, $where);
 				else
-					$where = array();
+					$where_array = array();
 			}
 			else
 			{
@@ -804,25 +804,45 @@ if(!class_exists('Channel_data_lib'))
 				$select	 = array();
 			}
 			
+			$where = $where_array;
+					
 			// Selects the appropriate field name and converts where converts
 			// where parameters to their corresponding field_id's
+			$field_array = array();
+
 			foreach($fields as $field)
 			{
 				if(is_array($select))
-					$select[] = 'field_id_'.$field->field_id.' as \''.$field->field_name.'\'';
-				
-				foreach($where as $index => $value)
 				{
-					$index = $this->check_ambiguity($index);
-										
-					if($field->field_name == $index)
-					{
-						unset($where[$index]);
-						$where['field_id_'.$field->field_id] = $value;
-					}
-				}		
+					$select[] = 'field_id_'.$field->field_id.' as \''.$field->field_name.'\'';
+				}
+
+				$field_array[$field->field_name] = $field;
 			}
-			
+				
+			$where_array = array();
+				
+			foreach($where as $index => $value)
+			{
+				$where_index = $this->check_ambiguity($index);
+				
+				if(isset($field_array[$where_index]))
+				{
+					unset($where_array[$where_index]);
+					$where_array['field_id_'.$field_array[$where_index]->field_id] = $value;
+				}
+				else
+				{
+					if($debug)
+					{
+						$debug_where[$index] = $field->field_name;
+					}
+					//var_dump($where_index);echo '<br><br>';
+					$where_array[$index] = $value;
+				}
+			}	
+
+			$where = $where_array;
 			
 			// Joins the channel_data table
 					
@@ -844,10 +864,11 @@ if(!class_exists('Channel_data_lib'))
 					$params[$keyword] = $$keyword;
 				}
 			}
-						
+				
 			// Converts the params into active record methods
+						
+			$this->convert_params($params, FALSE, FALSE, FALSE, FALSE, FALSE, $debug);
 			
-			$this->convert_params($params, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE);
 			
 			return $this->EE->db->get('channel_titles');		
 		}
@@ -1417,13 +1438,13 @@ if(!class_exists('Channel_data_lib'))
 					$params[$keyword] = $$keyword;
 				}
 			}
-						
+			
 			foreach($this->reserved_terms as $term)
 			{
 				if(isset($params[$term]) && $params[$term] !== FALSE)
 				{
 					$param = $params[$term];
-					
+							
 					switch ($term)
 					{
 						case 'select':
@@ -1445,9 +1466,10 @@ if(!class_exists('Channel_data_lib'))
 							
 						case 'where': 
 							$where_sql = array();
-							
+												
 							foreach($param as $field => $value)
-							{								
+							{		
+								$field = preg_replace('/\{+\d+\}/', '', $field);			
 								if(!is_array($value)) $value = array($value);
 								
 								foreach($value as $where_val)
@@ -1456,24 +1478,24 @@ if(!class_exists('Channel_data_lib'))
 								
 									$concat = ' AND ';
 									
-									if(preg_match("/^or.+/", $where_field))
+									if(preg_match("/(^or.+)|(^OR.+)/", $where_field))
 									{			
 										unset($params['where'][$field]);
 											
 										//$where_field 	=  preg_replace("/^or.+/", "", $field);
 										
-										$where_field 	= trim(str_replace("or ", '', $field));
+										$where_field 	= trim(str_replace(array("or ", "OR "), '', $field));
 										$concat 		= ' OR ';									
 									}
-																		
+																					
 									$where_sql[] =  $concat . $this->remove_conditionals($this->EE->db->protect_identifiers($where_field)) . $this->assign_conditional($where_field) . '\'' . $where_val . '\'';
 										
 								}
-							}
-							 
+							}							 
+							
 							$sql = trim(implode(' ', $where_sql));			
 							$sql = trim(ltrim(ltrim($sql, 'AND'), 'OR'));
-							
+														
 							if(!empty($sql)) $this->EE->db->where($sql, FALSE, FALSE);
 							
 							break;
@@ -1520,10 +1542,38 @@ if(!class_exists('Channel_data_lib'))
 						
 							if(is_array($param))
 							{
+								$having_sql = array();
+
 								foreach($param as $field => $value)
 								{
-									$this->EE->db->having($field, $value);
+									$field = preg_replace('/\{+\d+\}/', '', $field);			
+									if(!is_array($value)) $value = array($value);
+									
+									foreach($value as $where_val)
+									{
+										$where_field = trim($field);
+									
+										$concat = ' AND ';
+										
+										if(preg_match("/(^or.+)|(^OR.+)/", $where_field))
+										{			
+											unset($params['where'][$field]);
+												
+											//$where_field 	=  preg_replace("/^or.+/", "", $field);
+											
+											$where_field 	= trim(str_replace(array("or ", "OR "), '', $field));
+											$concat 		= ' OR ';									
+										}
+																						
+										$having_sql[] =  $concat . $this->remove_conditionals($this->EE->db->protect_identifiers($where_field)) . $this->assign_conditional($where_field) . '\'' . $where_val . '\'';
+											
+									}
 								}
+								
+								$sql = trim(implode(' ', $having_sql));			
+								$sql = trim(ltrim(ltrim($sql, 'AND'), 'OR'));
+							
+								if(!empty($sql)) $this->EE->db->having($sql, FALSE, FALSE);
 							}
 							
 							break;
@@ -1570,7 +1620,7 @@ if(!class_exists('Channel_data_lib'))
 		 * @return	object
 		 */
 		
-		public function assign_conditional($str)
+		public function assign_conditional($str, $debug = FALSE)
 		{
 			$conditionals 	= $this->conditionals;
 			$match			= FALSE;
@@ -1578,18 +1628,20 @@ if(!class_exists('Channel_data_lib'))
 			foreach($conditionals as $condition)
 			{				
 				$matches = array();
-				
+			
 				if(preg_match('/^([a-zA-Z0-9]).+'.$condition.'/', $str, $matches))
 				{
 					$match = TRUE;
 					$return = $condition;
-					
+				
+			
 					break;
 				}
-			}		
 					
-			if(!$match) $return = $conditionals[count($conditionals) - 1];
-					
+				
+				if(!$match) $return = '=';
+			}
+			
 			return ' '.str_replace('\\', '', $return).' ';
 		}
 		
