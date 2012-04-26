@@ -1,11 +1,15 @@
 /**
 * Authenticate
 * Author: Objective HTML (Justin Kimbrell)
-* Version: 1.1.0
-* Build: 20120413
+* Version: 1.1.2
+* Build: 20120426
 * Copyright 2012 - All rights reserved
 * http://objectivehtml.com
 */
+
+Version 1.1.2 - 04/26/2012
+--------------------------
+- Fixed an issue with the form action not returning to the correct page.
 
 Version 1.1.1 - 04/13/2012
 --------------------------
