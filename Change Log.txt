@@ -1,11 +1,17 @@
 /**
 * Authenticate
 * Author: Objective HTML (Justin Kimbrell)
-* Version: 1.1.2
+* Version: 1.2.0
 * Build: 20120426
 * Copyright 2012 - All rights reserved
 * http://objectivehtml.com
 */
+
+Version 1.2.0 - 06/19/2012
+--------------------------
+- (Maintenance) Updated Base_form and Channel Data.
+- (Feature) Encrypted hidden POST field values
+- (Feature) Added Dutch language compatibility
 
 Version 1.1.2 - 04/26/2012
 --------------------------

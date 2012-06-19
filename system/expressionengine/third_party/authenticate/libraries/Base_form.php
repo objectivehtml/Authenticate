@@ -9,43 +9,57 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/libraries/base_form
- * @version		1.2.3
- * @build		20120426
+ * @version		1.3.12
+ * @build		20120619
  */
 
 if(!class_exists('Base_form'))
 {
 	class Base_form {
 		
-		public $action					= '';
-		public $additional_params		= array('novalidate', 'onsubmit');
-		public $ajax_response			= FALSE;
-		public $class					= '';
-		public $groups					= array();
-		public $hidden_fields			= array();
-		public $error_handling			= FALSE;
-		public $errors					= array();
-		public $field_errors 			= array();
-		public $id						= '';
-		public $method					= 'post';	
-		public $name					= '';	
-		public $prefix					= '';
-		public $rules					= array();
-		public $return					= FALSE;
-		public $required				= '';
-		public $secure_action			= FALSE;
-		public $secure_return			= FALSE;
-		public $tagdata					= '';
-			
+		public $action            = '';
+		public $additional_params = array('novalidate', 'onsubmit');
+		public $ajax_response     = FALSE;
+		public $class             = '';
+		public $groups            = array();
+		public $hidden_fields     = array();
+		public $error_handling    = 'inline';
+		public $errors            = array();
+		public $field_errors      = array();
+		public $id                = '';
+		public $method            = 'post';	
+		public $name              = '';	
+		public $prefix            = '';
+		public $rules             = array();
+		public $return            = FALSE;
+		public $required          = '';
+		public $secure_action     = FALSE;
+		public $secure_return     = FALSE;
+		public $tagdata           = '';
+		public $key               = 'QZ@n/YsAgDi5Lz)o|RscOX\'rLY,pttpNPQ-83FP[`J_q~&Pxj7h{sA2`e5\v:#x';
+		public $validation_field  = 'base_form_submit';
+		
 		public function __construct()
 		{
 			$this->EE =& get_instance();
+			
+			// Load user defined key from config if one exists, if not use default.
+			// Obviously it's much more secure to use your own key!
+			
+			$this->EE->load->library('encrypt');
+			
+			$saved_key = config_item('encryption_key');
+			
+			if(!empty($saved_key))
+			{
+				$this->key = $saved_key;
+			}
 			
 			$this->return 	= $this->current_url();
 			$this->tagdata 	= $this->EE->TMPL->tagdata;
 		}
 		
-		public function clear()
+		public function clear($clear_errors = TRUE)
 		{
 			$this->action            = '';
 			$this->additional_params = array('novalidate', 'onsubmit');
@@ -53,20 +67,27 @@ if(!class_exists('Base_form'))
 			$this->class             = '';
 			$this->groups            = array();
 			$this->hidden_fields     = array();
-			$this->error_handling    = array();
-			$this->errors            = array();
-			$this->field_errors      = array();
+			$this->rules             = array();
+			$this->error_handling    = 'inline';
+			
+			if($clear_errors)
+			{
+				$this->errors            = array();
+				$this->field_errors      = array();
+			}
+			
 			$this->id                = '';
 			$this->post              = '';
+			$this->prefix			 = '';
+			$this->method            = 'post';
 			$this->name              = '';
-			$this->prefix            = '';
-			$this->rules             = array();
-			$this->return            = FALSE;
+			$this->return            = '';
 			$this->required          = '';
 			$this->secure_action     = FALSE;
 			$this->secure_return     = FALSE;
-			$this->tagdata           = $this->EE->TMPL->tagdata;
+			$this->tagdata           = '';
 		}
+		
 		
 		public function open($hidden_fields = array(), $fields = FALSE, $entry = FALSE)
 		{	
@@ -86,7 +107,8 @@ if(!class_exists('Base_form'))
 				$this->return = '/'.implode('/', $segments);
 			}			
 
-			$this->ajax_response	= $this->param('ajax_response', $this->param('ajax', $this->ajax_response));
+			$this->ajax_response	= $this->param('ajax_response', $this->param('ajax', $this->ajax_response, TRUE), TRUE);
+		
 			$this->secure_action 	= $this->param('secure_action', $this->secure_action, TRUE);
 			$this->secure_return 	= $this->param('secure_return', $this->secure_return, TRUE);
 			$this->action			= empty($this->action) ? $this->param('action', $this->current_url()) : $this->action;
@@ -123,7 +145,7 @@ if(!class_exists('Base_form'))
 				'site_url' => $this->param('site_url') ? $this->param('site_url') : $this->EE->config->item('site_url'),
 				'required' 		=> $this->required,
 				'secure_return' => $this->secure_return,
-				'ajax_response'	=> $this->ajax_response ? 'y' : 'n',
+				'ajax_response'	=> (boolean) $this->ajax_response ? 'y' : 'n',
 				'base_form_submit' => TRUE,
 				'return'		=> $this->return
 			));
@@ -240,8 +262,47 @@ if(!class_exists('Base_form'))
 				$this->action = rtrim($this->current_url(FALSE), '/') . '/' . ltrim($this->action, '/');
 			}
 			
+			if($this->error_handling != 'inline' && count(array_merge($this->field_errors, $this->errors)) > 0)
+			{
+				$this->EE->output->show_user_error('general', array_merge($this->field_errors, $this->errors));
+			}
+			
 			// Return the form
-			return form_open($this->action, $params, $hidden_fields) . $this->tagdata . '</form>';
+			return form_open($this->action, $params, $this->encode($hidden_fields)) . $this->tagdata . '</form>';
+		}
+		
+		public function encode($fields = array())
+		{
+			if(is_array($fields))
+			{
+				foreach($fields as $index => $value)
+				{
+					$fields[$index] = $this->EE->encrypt->encode($value, $this->key);
+				}
+			}
+			else
+			{
+				$fields = $this->EE->encrypt->encode($fields, $this->key);
+			}
+			
+			return $fields;
+		}
+		
+		public function decode($fields = array())
+		{
+			if(is_array($fields))
+			{
+				foreach($fields as $index => $value)
+				{
+					$fields[$index] = $this->EE->encrypt->decode($value, $this->key);
+				}
+			}
+			else
+			{
+				$fields = $this->EE->encrypt->decode($fields, $this->key);
+			}
+			
+			return $fields;
 		}
 		
 		public function set_rule($field_name, $rule)
@@ -263,7 +324,7 @@ if(!class_exists('Base_form'))
 		
 		public function set_field_error($field, $message)
 		{
-			$this->field_errors[$field] = $message;
+			$this->field_errors[$this->decode($field)] = $message;
 		}
 		
 		public function parse_fields($field_data, $entry_data, $prefix = '')
@@ -313,24 +374,24 @@ if(!class_exists('Base_form'))
 				
 		public function validate($required_fields = array(), $additional_rules = array())
 		{
-			if(isset($_POST['base_form_submit']))
+			if(isset($_POST[$this->validation_field]))
 				{
 				$vars = array();
 				
 				$this->EE->load->library('form_validation');
 				$this->EE->form_validation->set_error_delimiters('', '');
 				
-				$validate_fields = isset($_POST['required']) ? $_POST['required'] : $this->required;
+				$validate_fields = isset($_POST['required']) ? $this->decode($_POST['required']) : $this->required;
 				$validate_fields = !is_array($validate_fields) ? explode('|', $validate_fields) : $validate_fields;
 				
 				$required_fields = array_merge($required_fields, $validate_fields);
-				
+								
 				foreach($required_fields as $field)
 				{
 					$this->EE->form_validation->set_rules($field, ucwords(str_replace(array('-', '_'), ' ', $field)), 'trim|required');
 				}
 				
-				$rules = array_merge((isset($_POST['rule']) ? $_POST['rule'] : array()), $this->rules);
+				$rules = $this->decode(array_merge((isset($_POST['rule']) ? $_POST['rule'] : array()), $this->rules));
 				
 				foreach($rules as $field => $rule)
 				{
@@ -346,9 +407,9 @@ if(!class_exists('Base_form'))
 					$error_count = 0;	
 					
 					foreach($required_fields as $field)
-					{		
+					{	
 						$error = form_error($field);
-								
+							
 						if($error !== FALSE && !empty($error))
 						{	
 							$this->set_field_error($field, $error);
@@ -401,18 +462,11 @@ if(!class_exists('Base_form'))
 		{
 			$segments = $this->EE->uri->segment_array();
 			
-			$http = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https://' : 'http://';
-			
-			$port = $_SERVER['SERVER_PORT'] == '80' || $_SERVER['SERVER_PORT'] == '443' ? NULL : ':' . $_SERVER['SERVER_PORT'];
-			
-			if(!isset($_SERVER['SCRIPT_URI']))
-			{				
-				 $_SERVER['SCRIPT_URI'] = $http . $_SERVER['HTTP_HOST']. $_SERVER['REQUEST_URI'];
-			}
-			
-			$base_url = $http . $_SERVER['HTTP_HOST'];
+			$base_url = $this->base_url();
 			
 			$uri	  = '';
+			
+			$port = $_SERVER['SERVER_PORT'] == '80' || $_SERVER['SERVER_PORT'] == '443' ? NULL : ':' . $_SERVER['SERVER_PORT'];
 			
 			if($uri_segments)
 			{
@@ -429,6 +483,18 @@ if(!class_exists('Base_form'))
 			return $base_url . $port . $uri . $get;
 		}
 		
+		public function base_url()
+		{
+			$http = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https://' : 'http://';
+			
+			if(!isset($_SERVER['SCRIPT_URI']))
+			{				
+				 $_SERVER['SCRIPT_URI'] = $http . $_SERVER['HTTP_HOST']. $_SERVER['REQUEST_URI'];
+			}
+			
+			return $http . $_SERVER['HTTP_HOST'];
+		}
+
 		public function parse($vars, $tagdata = FALSE)
 		{
 			if($tagdata === FALSE)

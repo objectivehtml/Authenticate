@@ -7,8 +7,8 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/authenticate
- * @version		1.1.1
- * @build		20120413
+ * @version		1.1.2
+ * @build		20120619
  */
  
 class Authenticate {
@@ -99,7 +99,7 @@ class Authenticate {
 			$rule = 'required|trim';
 		}
 		
-		$this->EE->base_form->clear();
+		$this->EE->base_form->clear(FALSE);
 		$this->EE->base_form->tagdata = $this->EE->TMPL->tagdata;
 		$this->EE->base_form->set_rule($username_field, $rule);
 		$this->EE->base_form->set_rule($password_field, 'required|trim');
