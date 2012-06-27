@@ -109,6 +109,7 @@ class Authenticate {
 		$this->EE->base_form->tagdata = $this->EE->TMPL->tagdata;
 		
 		$this->EE->base_form->set_message('required', lang('authenticate_required_field'));
+		$this->EE->base_form->set_message('valid_email', lang('authenticate_valid_email'));
 		
 		$this->EE->base_form->set_rule($username_field, $rule);
 		$this->EE->base_form->set_rule($password_field, 'required|trim');

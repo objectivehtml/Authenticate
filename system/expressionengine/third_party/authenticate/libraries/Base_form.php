@@ -10,7 +10,7 @@
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/libraries/base_form
  * @version		1.3.13
- * @build		20120626
+ * @build		20120627
  */
 
 if(!class_exists('Base_form'))

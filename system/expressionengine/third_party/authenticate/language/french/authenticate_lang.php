@@ -11,7 +11,8 @@ $lang = array(
 	'authenticate_error_sending_email'  => 'Une erreur est survenue lors de l\'envoi d\'un message ˆ cette adresse',
 	
 	'authenticate_member_not_active'    => 'Votre compte a t activ',
-	'authenticate_required_field'       => 'The %s field is required',
+	'authenticate_required_field'       => 'Le champ <em>%s</em> est obligatoire',
+	'authenticate_valid_email'          => 'Le champ <em>%s</em> ne contient pas une adresse e mail valide',
 	
 	//--------------------------------------------
 	'', ''
