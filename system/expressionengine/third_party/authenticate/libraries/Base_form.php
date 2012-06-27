@@ -408,7 +408,6 @@ if(!class_exists('Base_form'))
 					
 					$required_fields = array_merge(array($field), $required_fields);
 					
-					$this->EE->form_validation->set_message('required', lang('authenticate_required_field'));
 					$this->EE->form_validation->set_rules($field, $label, $rule);
 				}
 				

@@ -107,6 +107,9 @@ class Authenticate {
 		$this->EE->base_form->clear(FALSE);
 		$this->EE->base_form->validation_field = 'authenticate_member_login';
 		$this->EE->base_form->tagdata = $this->EE->TMPL->tagdata;
+		
+		$this->EE->base_form->set_message('required', lang('authenticate_required_field'));
+		
 		$this->EE->base_form->set_rule($username_field, $rule);
 		$this->EE->base_form->set_rule($password_field, 'required|trim');
 		
