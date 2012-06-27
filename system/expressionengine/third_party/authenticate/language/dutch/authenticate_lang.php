@@ -8,7 +8,10 @@ $lang	= array(
 	'authenticate_failed_message_email'	=> 'Het inloggen is mislukt. Controleer uw e-mail adres en wachtwoord',
 	'authenticate_failed_message_user'	=> 'Het inloggen is mislukt. Controleer uw gebruikersnaam en wachtwoord',
 	'authenticate_invalid_email'		=> 'Het inloggen is mislukt. Ongeldig e-mail adres',
-
+	'authenticate_error_sending_email'  => '',
+	
+	'authenticate_member_not_active'	=> 'Uw account is nog niet geactiveerd',
+	
 	//--------------------------------------------
 	'', ''
 );
