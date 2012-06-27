@@ -47,6 +47,7 @@ if(!class_exists('Base_form'))
 			// Obviously it's much more secure to use your own key!
 			
 			$this->EE->load->library('encrypt');
+			$this->EE->load->library('form_validation');
 			
 			$saved_key = config_item('encryption_key');
 			
@@ -323,6 +324,11 @@ if(!class_exists('Base_form'))
 			$this->errors['Error '.(count($this->errors) + 1)] = $message;
 		}
 		
+		public function set_message($rule, $message)
+		{
+			$this->EE->form_validation->set_message($rule, $message);		
+		}
+		
 		public function set_field_error($field, $message)
 		{
 			$this->field_errors[$this->decode($field)] = $message;
@@ -378,18 +384,20 @@ if(!class_exists('Base_form'))
 			if(isset($_POST[$this->validation_field]))
 			{
 				$vars = array();
-				
-				$this->EE->load->library('form_validation');
+
 				$this->EE->form_validation->set_error_delimiters('', '');
 				
 				$validate_fields = isset($_POST['required']) ? $this->decode($_POST['required']) : $this->required;
 				$validate_fields = !is_array($validate_fields) ? explode('|', $validate_fields) : $validate_fields;
 				
 				$required_fields = array_merge($required_fields, $validate_fields);
-								
+							
 				foreach($required_fields as $field)
 				{
-					$this->EE->form_validation->set_rules($field, ucwords(str_replace(array('-', '_'), ' ', $field)), 'trim|required');
+					if(!empty($field))
+					{
+						$this->EE->form_validation->set_rules($field, ucwords(str_replace(array('-', '_'), ' ', $field)), 'callback_required_field_check');
+					}
 				}
 				
 				$rules = $this->decode(array_merge((isset($_POST['rule']) ? $_POST['rule'] : array()), $this->rules));
@@ -400,6 +408,7 @@ if(!class_exists('Base_form'))
 					
 					$required_fields = array_merge(array($field), $required_fields);
 					
+					$this->EE->form_validation->set_message('required', lang('authenticate_required_field'));
 					$this->EE->form_validation->set_rules($field, $label, $rule);
 				}
 				
@@ -418,6 +427,11 @@ if(!class_exists('Base_form'))
 					}
 				}
 			}
+		}
+		
+		public function required_field_check()
+		{
+			echo 'test';exit();
 		}
 		
 		public function redirect($group_id = FALSE)

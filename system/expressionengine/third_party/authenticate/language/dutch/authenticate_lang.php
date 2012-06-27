@@ -11,6 +11,7 @@ $lang	= array(
 	'authenticate_error_sending_email'  => '',
 	
 	'authenticate_member_not_active'	=> 'Uw account is nog niet geactiveerd',
+	'authenticate_required_field'       => 'The %s field is required',
 	
 	//--------------------------------------------
 	'', ''

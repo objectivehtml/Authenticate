@@ -8,10 +8,11 @@ $lang	= array(
 	'authenticate_failed_message_email'	=> 'That e-mail address and password was not found',
 	'authenticate_failed_message_user'	=> 'That username and password was not found',
 	'authenticate_invalid_email'		=> 'That is not an e-mail that has been previously registered',
-	
-	'authenticate_member_not_active'	=> 'Your account has not been activated',
 	'authenticate_error_sending_email'  => 'An error occurred when sending an email to that address',
 	
+	'authenticate_member_not_active'	=> 'Your account has not been activated',
+	'authenticate_required_field'       => 'The %s field is required',
+		
 	//--------------------------------------------
 	'', ''
 );
