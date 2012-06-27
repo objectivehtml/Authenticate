@@ -7,8 +7,8 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/authenticate
- * @version		1.1.2
- * @build		20120619
+ * @version		1.2.1
+ * @build		20120627
  */
  
 class Authenticate {
@@ -25,6 +25,8 @@ class Authenticate {
 	public function login_form()
 	{	
 		$this->EE->load->library('Base_form');
+		$this->EE->base_form->validation_field = 'authenticate_member_login';
+		$this->EE->base_form->errors = array();
 		
 		$username_field = $this->param('username_field', 'username');
 		$password_field = $this->param('password_field', 'password');
@@ -37,15 +39,15 @@ class Authenticate {
 			$ajax	   = $this->EE->input->post('ajax_response') == 'y' ? TRUE : FALSE;
 			 
 			$auth = $this->EE->authenticate_lib->login($auth_user, $auth_pass, $auth_type);
-			
-			if($auth !== FALSE)
+						
+			if($auth['member'] !== FALSE)
 			{
-				$auth->remember_me(60*60*24*182);
-				$auth->start_session();
+				$auth['member']->remember_me(60*60*24*182);
+				$auth['member']->start_session();
 				
 				if(!$ajax)
 				{
-					return $this->EE->base_form->redirect($auth->member('group_id'));
+					return $this->EE->base_form->redirect($auth['member']->member('group_id'));
 				}
 				else
 				{
@@ -63,13 +65,16 @@ class Authenticate {
 				
 				if(count($this->EE->base_form->field_errors) == 0)
 				{
-					if($auth_type == 'username')
+					if($auth['is_active'])
 					{
-						$this->EE->base_form->set_error(lang('authenticate_failed_message_user'));
-					}
-					else
-					{
-						$this->EE->base_form->set_error(lang('authenticate_failed_message_email'));
+						if($auth_type == 'username')
+						{
+							$this->EE->base_form->set_error(lang('authenticate_failed_message_user'));
+						}
+						else
+						{
+							$this->EE->base_form->set_error(lang('authenticate_failed_message_email'));
+						}
 					}
 					
 					$response['error_type'] = 'auth';
@@ -100,6 +105,7 @@ class Authenticate {
 		}
 		
 		$this->EE->base_form->clear(FALSE);
+		$this->EE->base_form->validation_field = 'authenticate_member_login';
 		$this->EE->base_form->tagdata = $this->EE->TMPL->tagdata;
 		$this->EE->base_form->set_rule($username_field, $rule);
 		$this->EE->base_form->set_rule($password_field, 'required|trim');
@@ -117,13 +123,14 @@ class Authenticate {
 	function forgot_password_form()
 	{
 		$this->EE->load->library('Base_form');
-		
+		$this->EE->base_form->clear();
+		$this->EE->base_form->validation_field = 'authenticate_reset_password';
+			
 		$email_field = $this->param('email_field', 'email');
-		
-		$this->EE->base_form->validate();
 		
 		if($this->EE->input->post('authenticate_reset_password'))
 		{
+			
 			$emails = $this->EE->channel_data->get_members(array(
 				'where' => array(
 					'email' => $this->EE->input->post($email_field)
@@ -142,11 +149,12 @@ class Authenticate {
 			if( count($this->EE->base_form->field_errors) == 0 &&
 				count($this->EE->base_form->errors) == 0)
 			{
-				require_once(APPPATH.'modules/member/mod.member.php');
-				require_once(APPPATH.'modules/member/mod.member_auth.php');
-
-				$Auth = new Member_auth();
-				$Auth->retrieve_password();
+				$this->EE->authenticate_lib->forgot_password();
+				
+				if(count($this->EE->base_form->errors) == 0)
+				{
+					$this->EE->base_form->redirect();
+				}
 			}
 		}
 		
@@ -154,6 +162,7 @@ class Authenticate {
 			'authenticate_reset_password' => 1
 		);
 		
+		$this->EE->base_form->validation_field = 'authenticate_reset_password';
 		$this->EE->base_form->set_rule($email_field, 'required|valid_email|trim');
 		
 		$form_open = $this->EE->base_form->open($hidden_fields);

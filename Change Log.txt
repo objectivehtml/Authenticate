@@ -1,11 +1,18 @@
 /**
 * Authenticate
 * Author: Objective HTML (Justin Kimbrell)
-* Version: 1.2.0
-* Build: 20120426
+* Version: 1.2.1
+* Build: 20120627
 * Copyright 2012 - All rights reserved
 * http://objectivehtml.com
 */
+
+Version 1.2.1 - 06/27/2012
+--------------------------
+- (Bug Fix) Fixed a bug that triggered when the login and forgot password forms were on the same template.
+- (Bug Fix) Fixed a bug that caused the redirect variable to not get decoded.
+- (Bug Fix) Fixed a bug that caused the ugly screen to appear when members logged in that weren't authenticated.
+- (Bug Fix) Fixed a bug that caused multiple forms to validate in the were on the same templates.
 
 Version 1.2.0 - 06/19/2012
 --------------------------

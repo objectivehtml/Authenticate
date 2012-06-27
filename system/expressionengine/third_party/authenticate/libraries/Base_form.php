@@ -9,8 +9,8 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/libraries/base_form
- * @version		1.3.12
- * @build		20120619
+ * @version		1.3.13
+ * @build		20120626
  */
 
 if(!class_exists('Base_form'))
@@ -85,7 +85,8 @@ if(!class_exists('Base_form'))
 			$this->required          = '';
 			$this->secure_action     = FALSE;
 			$this->secure_return     = FALSE;
-			$this->tagdata           = '';
+			$this->tagdata           = $this->EE->TMPL->tagdata;
+			$this->validation_field  = 'base_form_submit';
 		}
 		
 		
@@ -375,7 +376,7 @@ if(!class_exists('Base_form'))
 		public function validate($required_fields = array(), $additional_rules = array())
 		{
 			if(isset($_POST[$this->validation_field]))
-				{
+			{
 				$vars = array();
 				
 				$this->EE->load->library('form_validation');
@@ -425,12 +426,12 @@ if(!class_exists('Base_form'))
 			
 			if(isset($_POST['return']))
 			{
-				$url = $_POST['return'];
+				$url = $this->decode($this->EE->input->post('return', TRUE));
 			}
-			
+						
 			if(isset($_POST['secure_return']))
 			{
-				$this->secure_return = (int) $_POST['secure_return'] == 1 ? TRUE : FALSE;
+				$this->secure_return = (int) $this->decode($this->EE->input->post('secure_return', TRUE)) == 1 ? TRUE : FALSE;
 			}
 			
 			if($group_id)
@@ -442,7 +443,7 @@ if(!class_exists('Base_form'))
 					$url = $group_redirect;
 				}
 			}
-			
+						
 			$url = $this->secure_url($url, $this->secure_return);
 						
 			return $this->EE->functions->redirect($url);
