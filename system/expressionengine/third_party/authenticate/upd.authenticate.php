@@ -7,13 +7,15 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/authenticate
- * @version		1.1.2
- * @build		20120619
+ * @version		1.2.1
+ * @build		20120627
  */
  
+require_once PATH_THIRD . 'authenticate/config/config.php';
+
 class Authenticate_upd {
 
-    public $version = '1.1.2';
+    public $version = AUTHENTICATE_VERSION;
 	public $mod_name;
 	public $ext_name;
 	public $mcp_name;

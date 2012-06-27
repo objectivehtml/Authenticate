@@ -7,8 +7,8 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/authenticate
- * @version		1.1.2
- * @build		20120619
+ * @version		1.2.1
+ * @build		20120627
  */
  
 class Authenticate_mcp {
