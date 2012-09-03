@@ -7,8 +7,8 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/authenticate
- * @version		1.2.1
- * @build		20120627
+ * @version		1.2.2
+ * @build		20120903
  */
  
 class Authenticate {
@@ -36,8 +36,8 @@ class Authenticate {
 		{
 			$auth_user = $this->EE->input->post($username_field);
 			$auth_pass = $this->EE->input->post($password_field);
-			$ajax	   = $this->EE->input->post('ajax_response') == 'y' ? TRUE : FALSE;
-			 
+			$ajax	   = $this->EE->base_form->decode($this->EE->input->post('ajax_response')) == 'y' ? TRUE : FALSE;
+			
 			$auth = $this->EE->authenticate_lib->login($auth_user, $auth_pass, $auth_type);
 						
 			if($auth['member'] !== FALSE)
