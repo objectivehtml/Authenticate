@@ -20,8 +20,8 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/libraries/channel_data
- * @version		0.6.12
- * @build		20120619
+ * @version		0.8.1
+ * @build		20120827
  */
 
 
@@ -33,7 +33,7 @@ if(!class_exists('Channel_data'))
 		
 		// Available Drivers
 			
-		public $drivers = array('channel_data_api', 'channel_data_utility');	
+		public $drivers = array('channel_data_api', 'channel_data_utility', 'channel_data_tmpl');	
 		public $debug	= FALSE;
 		
 		/**
