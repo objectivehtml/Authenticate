@@ -9,8 +9,8 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/libraries/base_form
- * @version		1.3.13
- * @build		20120627
+ * @version		1.4.1
+ * @build		20120928
  */
 
 if(!class_exists('Base_form'))
@@ -211,11 +211,10 @@ if(!class_exists('Base_form'))
 			$post = $this->add_prefix('post', $_POST);
 			
 			// If channel fields and an entry exists, parse the fields with the data
-			if($fields && $entry)
+			if($fields && is_array($entry))
 			{
 				$this->tagdata = $this->parse_fields($fields, $entry);				
 			}
-			
 			// Parse the template variables
 			$this->tagdata = $this->parse(array($post));
 					
@@ -273,13 +272,54 @@ if(!class_exists('Base_form'))
 			return form_open($this->action, $params, $this->encode($hidden_fields)) . $this->tagdata . '</form>';
 		}
 		
+		public function get($field_name, $default = FALSE, $decode = TRUE)
+		{
+			$var = $this->EE->input->get($field_name);
+			
+			if($var && $decode)
+			{
+				$var = $this->decode($var);
+			}
+			
+			if($var === FALSE)
+			{
+				$var = $default;
+			}
+			
+			return $var;
+		}
+		
+		public function post($field_name, $default = FALSE, $decode = TRUE)
+		{
+			$var = $this->EE->input->post($field_name);
+			
+			if($var && $decode)
+			{
+				$var = $this->decode($var);
+			}
+			
+			if($var === FALSE)
+			{
+				$var = $default;
+			}
+			
+			return $var;
+		}
+		
 		public function encode($fields = array())
 		{
 			if(is_array($fields))
 			{
 				foreach($fields as $index => $value)
 				{
-					$fields[$index] = $this->EE->encrypt->encode($value, $this->key);
+					if(is_array($value))
+					{
+						$fields[$index] = $this->encode($value);
+					}
+					else
+					{
+						$fields[$index] = $this->EE->encrypt->encode($value, $this->key);
+					}
 				}
 			}
 			else
@@ -296,7 +336,14 @@ if(!class_exists('Base_form'))
 			{
 				foreach($fields as $index => $value)
 				{
-					$fields[$index] = $this->EE->encrypt->decode($value, $this->key);
+					if(is_array($value))
+					{
+						$fields[$index] = $this->decode($value);
+					}
+					else
+					{
+						$fields[$index] = $this->EE->encrypt->decode($value, $this->key);
+					}
 				}
 			}
 			else
@@ -365,13 +412,19 @@ if(!class_exists('Base_form'))
 					{
 						foreach(explode("\n", $row['field_list_items']) as $option_index => $option)
 						{
-							$vars[0]['options:'.$field_name][$option_index] = array(
+							
+							$values = explode('|', $vars[0][$field_name]);
+							
+							$checked = 'checked="checked"';
+							$selected = 'selected="selected"';
+							
+							$vars[0]['options:'.$field_name][] = array(
 								'option_value'	=> $option,
 								'option_name' 	=> $option,
-								'selected'		=> $vars[0][$field_name] == $option ? 'selected="selected"' : NULL,
-								'checked'		=> $vars[0][$field_name] == $option ? 'checked="checked"' : NULL
-							);							
-						}
+								'selected'		=> in_array($option, $values) ? $selected : NULL,
+								'checked'		=> in_array($option, $values) ? $checked : NULL
+							);										
+						}	
 					}
 				}
 			}
