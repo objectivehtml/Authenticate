@@ -7,8 +7,8 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/authenticate
- * @version		1.2.3
- * @build		20120911
+ * @version		1.2.6
+ * @build		20121123
  */
  
 require_once PATH_THIRD . 'authenticate/config/config.php';
