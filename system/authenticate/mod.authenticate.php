@@ -86,6 +86,13 @@ class Authenticate {
 					$response['errors'] = (array) $this->EE->base_form->field_errors;
 				}
 				
+				$this->EE->TMPL->tagdata = $this->parse(array(
+					array(
+						'is_auth_error' => count($response['errors']) > 0 ? TRUE : FALSE,
+						'auth_error'    => implode('<br>', $response['errors'])
+					)
+				));
+				
 				if($ajax)
 				{
 					$this->EE->output->send_ajax_response($response);
