@@ -13,8 +13,8 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/libraries/channel_data
- * @version		0.8.17
- * @build		20121231
+ * @version		0.8.19
+ * @build		20120215
  */
 
 if(!class_exists('Channel_data_lib'))
@@ -391,7 +391,7 @@ if(!class_exists('Channel_data_lib'))
 		 * @return	object
 		 */
 
-		public function get_category_entries($select = array(), $where = array(), $order_by = 'cat_id', $sort = 'DESC', $limit = FALSE, $offset = 0)
+		public function get_category_entries($select = array(), $where = array(), $order_by = 'categories.cat_id', $sort = 'DESC', $limit = FALSE, $offset = 0)
 		{
 			$fields 		= $this->get_category_fields()->result();
 			$field_array	= array();
@@ -405,18 +405,24 @@ if(!class_exists('Channel_data_lib'))
 
 			if($this->is_polymorphic($select) && $polymorphic = $select)
 			{
-				extract($select);
+				extract($this->prepare_extract($select));
 
 				foreach($this->reserved_terms as $term)
 				{
-					if(!isset($polymorphic[$term]) && isset($$term) || isset($polymorphic[$term]))
-					{
-                        $var_term = $$term;
-
+					$var_name = str_replace(' ', '_', $term);
+					
+                	if(!isset($polymorphic[$term]) && isset($$var_name) || isset($polymorphic[$term]))
+                	{
+                        $var_term = $$var_name;
+					
 						if($term == 'select' && !isset($var_term['select']))
-							$$term = $default_select;
+						{
+							$$var_name = $default_select;
+						}
 						else
-							$$term = isset($polymorphic[$term]) ? $polymorphic[$term] : $$term;
+						{
+							$$var_name = isset($polymorphic[$term]) ? $polymorphic[$term] : $$var_name;
+						}
 					}
 				}
 			}
@@ -1077,21 +1083,23 @@ if(!class_exists('Channel_data_lib'))
 
 			if($this->is_polymorphic($select) && $polymorphic = $select)
 			{
-				extract($select);
+				extract($this->prepare_extract($select));
 
 				foreach($this->reserved_terms as $term)
 				{
-                	if(!isset($polymorphic[$term]) && isset($$term) || isset($polymorphic[$term]))
+					$var_name = str_replace(' ', '_', $term);
+					
+                	if(!isset($polymorphic[$term]) && isset($$var_name) || isset($polymorphic[$term]))
                 	{
-                        $var_term = $$term;
-
+                        $var_term = $$var_name;
+					
 						if($term == 'select' && !isset($var_term['select']))
 						{
-							$$term = $default_select;
+							$$var_name = $default_select;
 						}
 						else
 						{
-							$$term = isset($polymorphic[$term]) ? $polymorphic[$term] : $$term;
+							$$var_name = isset($polymorphic[$term]) ? $polymorphic[$term] : $$var_name;
 						}
 					}
 				}
@@ -1152,9 +1160,11 @@ if(!class_exists('Channel_data_lib'))
 			
 			foreach(array('join', 'inner join', 'left join', 'outer join', 'having', 'group_by') as $keyword)
 			{
-				if(isset($$keyword))
+				$keyword_var = str_replace(' ', '_', $keyword);
+				
+				if(isset($$keyword_var))
 				{
-					$params[$keyword] = $$keyword;
+					$params[$keyword] = $$keyword_var;
 				}
 			}
 
@@ -1213,18 +1223,24 @@ if(!class_exists('Channel_data_lib'))
 
 			if($this->is_polymorphic($select) && $polymorphic = $select)
 			{
-				extract($select);
+				extract($this->prepare_extract($select));
 
 				foreach($this->reserved_terms as $term)
 				{
-					if(!isset($polymorphic[$term]) && isset($$term) || isset($polymorphic[$term]))
-					{
-                        $var_term = $$term;
-
+					$var_name = str_replace(' ', '_', $term);
+					
+                	if(!isset($polymorphic[$term]) && isset($$var_name) || isset($polymorphic[$term]))
+                	{
+                        $var_term = $$var_name;
+					
 						if($term == 'select' && !isset($var_term['select']))
-							$$term = $default_select;
+						{
+							$$var_name = $default_select;
+						}
 						else
-							$$term = isset($polymorphic[$term]) ? $polymorphic[$term] : $$term;
+						{
+							$$var_name = isset($polymorphic[$term]) ? $polymorphic[$term] : $$var_name;
+						}
 					}
 				}
 			}
@@ -1232,9 +1248,13 @@ if(!class_exists('Channel_data_lib'))
 			// Selects the appropriate field name and converts where converts
 			// where parameters to their corresponding m_field_id's
 			foreach($fields as $field)
-			{
-				if(is_array($select))
-					$select[] = 'm_field_id_'.$field->m_field_id.' as \''.$field->m_field_name.'\'';
+			{			
+				if(!is_array($select))
+				{
+					$select = array($select);
+				}
+				
+				$select[] = 'm_field_id_'.$field->m_field_id.' as \''.$field->m_field_name.'\'';
 
 				foreach($where as $index => $value)
 				{
@@ -1266,41 +1286,6 @@ if(!class_exists('Channel_data_lib'))
 			$this->convert_params($params, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE);
 
 			return $this->EE->db->get('members');
-
-
-			foreach($fields as $field)
-			{
-				$field_array[$field->m_field_name] = $field;
-				$field_select[] = 'm_field_'.$field->m_field_id.' as \''.$field->m_field_name.'\'';
-			}
-
-			if($this->is_polymorphic($select))
-			{
-				if(isset($select['select']))
-				{
-					$select_array = $select['select'];
-
-					if(!is_array($select['select']))
-					{
-						$select_array = array($select['select']);
-					}
-
-					$select['select'] = array_merge($select_array, $field_select);
-				}
-			}
-			else
-			{
-				if(!is_array($select))
-				{
-					$select = array($select);
-				}
-
-				$select = array_merge($select, $field_select);
-			}
-
-			$this->EE->db->join('member_data', 'members.member_id = member_data.member_id');
-
-			return $this->get('members', $select, $where, $order_by, $sort, $limit, $offset);
 		}
 
 		/**
@@ -1794,7 +1779,7 @@ if(!class_exists('Channel_data_lib'))
 								$param = array($param);
 							}
 							
-							foreach($param as $row)
+							foreach($param as $index => $row)
 							{
 								if(!is_array($row))
 								{
@@ -1934,6 +1919,23 @@ if(!class_exists('Channel_data_lib'))
 			}
 
 			return FALSE;
+		}
+		
+		public function prepare_extract($vars)
+		{
+			if(!is_array($vars))
+			{
+				$vars = array($vars);
+			}
+			
+			$new_array = array();
+			
+			foreach($vars as $index => $var)
+			{
+				$new_array[str_replace(' ', '_', $index)] = $var;	
+			}
+			
+			return $new_array;
 		}
 	}
 }
