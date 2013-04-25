@@ -1,13 +1,13 @@
 /**
 * Authenticate
 * Author: Objective HTML (Justin Kimbrell)
-* Version: 1.2.7
+* Version: 1.2.8
 * Build: 20130425
 * Copyright 2012 - All rights reserved
 * http://objectivehtml.com
 */
 
-Version 1.2.7 - 04/25/2012
+Version 1.2.8 - 04/25/2012
 --------------------------
 - Updated core libraries
 
