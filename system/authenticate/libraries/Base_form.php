@@ -9,8 +9,8 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/libraries/base_form
- * @version		1.5.1
- * @build		20120103
+ * @version		1.6.0
+ * @build		20130619
  */
 
 if(!class_exists('Base_form'))
@@ -20,7 +20,6 @@ if(!class_exists('Base_form'))
 		public $action            = '';
 		public $additional_params = array('novalidate', 'onsubmit');
 		public $ajax_response     = FALSE;
-		public $json_response	  = FALSE;
 		public $class             = '';
 		public $groups            = array();
 		public $hidden_fields     = array();
@@ -48,6 +47,7 @@ if(!class_exists('Base_form'))
 			// Load user defined key from config if one exists, if not use default.
 			// Obviously it's much more secure to use your own key!
 			
+			$this->EE->load->helper('addon_helper');
 			$this->EE->load->library('encrypt');
 			$this->EE->load->library('form_validation');
 			
@@ -61,12 +61,12 @@ if(!class_exists('Base_form'))
 			$this->return 	= $this->current_url();
 			$this->tagdata 	= $this->EE->TMPL->tagdata;
 		}
-			
+		
 		public function clear($clear_errors = TRUE)
 		{
 			$this->action            = '';
 			$this->additional_params = array('novalidate', 'onsubmit');
-			$this->json_resonse      = $this->ajax_response = FALSE;
+			$this->ajax_response     = FALSE;
 			$this->class             = '';
 			$this->groups            = array();
 			$this->hidden_fields     = array();
@@ -101,10 +101,7 @@ if(!class_exists('Base_form'))
 
 			if($this->return_var)
 			{
-				if($return_var = $this->EE->input->get_post($this->return_var))
-				{
-					$this->return = $return_var;
-				}
+				$this->return   = $this->EE->input->get_post('return');
 			}
 			
 			if($this->return_segment)
@@ -114,7 +111,7 @@ if(!class_exists('Base_form'))
 				$this->return = '/'.implode('/', $segments);
 			}			
 
-			$this->json_response = $this->ajax_response	= $this->param('json_response', $this->param('ajax_response', $this->param('ajax', $this->ajax_response, TRUE), TRUE));
+			$this->ajax_response	= $this->param('ajax_response', $this->param('ajax', $this->ajax_response, TRUE), TRUE);
 		
 			$this->secure_action 	= $this->param('secure_action', $this->secure_action, TRUE);
 			$this->secure_return 	= $this->param('secure_return', $this->secure_return, TRUE);
@@ -122,7 +119,7 @@ if(!class_exists('Base_form'))
 			$this->action			= $this->secure_url($this->action, $this->secure_action);		
 			
 			$this->class			= $this->param('class', $this->class);
-			$this->groups			= $this->EE->db->get('member_groups')->result_array();
+			$this->groups			= $this->EE->channel_data->get_member_groups()->result_array();
 			
 			$this->error_handling 	= $this->param('error_handling', $this->error_handling);
 			$this->hidden_fields	= array_merge($this->hidden_fields, $hidden_fields);
@@ -148,14 +145,13 @@ if(!class_exists('Base_form'))
 			
 			// Merges the default hidden_fields			
 			$hidden_fields  = array_merge($this->hidden_fields, array(
-				'XID'                   => '{XID_HASH}',
-				'site_url'              => $this->param('site_url') ? $this->param('site_url') : $this->EE->config->item('site_url'),
-				'required'              => $this->required,
-				'secure_return'         => $this->secure_return,
-				'ajax_response'         => (boolean) $this->json_response ? 'y' : 'n',
-				'json_response'         => (boolean) $this->json_response ? 'y' : 'n',
-				$this->validation_field => TRUE,
-				'return'                => $this->return
+				'XID'	   => '{XID_HASH}',
+				'site_url' => $this->param('site_url') ? $this->param('site_url') : $this->EE->config->item('site_url'),
+				'required' 		=> $this->required,
+				'secure_return' => $this->secure_return,
+				'ajax_response'	=> (boolean) $this->ajax_response ? 'y' : 'n',
+				'base_form_submit' => TRUE,
+				'return'		=> $this->return
 			));
 			
 			// Loops through the member groups looking for dynamic redirects
@@ -235,7 +231,6 @@ if(!class_exists('Base_form'))
 				{
 					$errors[0]['field_errors'][$x] 		= array('error' => $error);
 					$errors[0]['field_error:'.$field]   = $error;
-					$errors[0]['error:'.$field]   	    = $error;
 					$x++;
 				}
 				
@@ -251,7 +246,6 @@ if(!class_exists('Base_form'))
 				foreach($this->errors as $error)
 				{
 					$errors[0]['global_errors'][$x]	= array('error' => $error);
-					$errors[0]['global_error:'.$x]  = $error;
 					$x++;
 				}
 				
@@ -376,43 +370,6 @@ if(!class_exists('Base_form'))
 			return $fields;
 		}
 		
-		public function hidden_field($index, $value = '')
-		{
-			return $this->set_hidden_field($index, $value);
-		}
-		
-		public function set_hidden_field($index, $value = '')
-		{	
-			if(!is_array($index))
-			{
-				$field = array($index => $value);
-			}
-			else
-			{
-				$field = $index;	
-			}
-			
-			$this->hidden_fields = array_merge($this->hidden_fields, $field);
-		}
-		
-		public function hidden_fields($fields)
-		{
-			return $this->set_hidden_fields($fields);
-		}
-		
-		public function set_hidden_fields($fields)
-		{
-			if(!is_array($fields))
-			{
-				return;	
-			}
-			
-			foreach($fields as $index => $value)
-			{
-				$this->hidden_field($index, $value);
-			}
-		}
-		
 		public function set_rule($field_name, $rule)
 		{
 			$field_name = str_replace('rules:', '', $field_name);
@@ -437,9 +394,7 @@ if(!class_exists('Base_form'))
 		
 		public function set_field_error($field, $message)
 		{
-			//$this->field_errors[$this->decode($field)] = $message;
-			
-			$this->field_errors[$field] = $message;
+			$this->field_errors[$this->decode($field)] = $message;
 		}
 		
 		public function parse_fields($field_data, $entry_data, $prefix = '')
@@ -542,13 +497,11 @@ if(!class_exists('Base_form'))
 			}
 		}
 		
-		public function json($json)
+		public function required_field_check()
 		{
-			header('Content-type: application/json');
-			echo json_encode($json);
-			exit();
+			echo 'test';exit();
 		}
-			
+		
 		public function redirect($group_id = FALSE)
 		{
 			$url = $this->return;
@@ -590,39 +543,12 @@ if(!class_exists('Base_form'))
 		
 		public function current_url($uri_segments = TRUE)
 		{
-			$segments = $this->EE->uri->segment_array();
-			
-			$base_url = $this->base_url();
-			
-			$uri	  = '';
-			
-			$port = $_SERVER['SERVER_PORT'] == '80' || $_SERVER['SERVER_PORT'] == '443' ? NULL : ':' . $_SERVER['SERVER_PORT'];
-			
-			if($uri_segments)
-			{
-				$uri = '/' . implode('/', $segments);
-			}
-			
-			$get = '';
-			
-			if(count($_GET) > 0)
-			{
-				$get = '?'.http_build_query($_GET);
-			}
-			
-			return $base_url . $port . $uri . $get;
+			return page_url($uri_segments);
 		}
 		
 		public function base_url()
 		{
-			$http = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ? 'https://' : 'http://';
-			
-			if(!isset($_SERVER['SCRIPT_URI']))
-			{				
-				 $_SERVER['SCRIPT_URI'] = $http . $_SERVER['HTTP_HOST']. $_SERVER['REQUEST_URI'];
-			}
-			
-			return $http . $_SERVER['HTTP_HOST'];
+			return base_url();
 		}
 
 		public function parse($vars, $tagdata = FALSE)
