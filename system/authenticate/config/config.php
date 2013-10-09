@@ -6,7 +6,7 @@
 
 if(!defined('AUTHENTICATE_VERSION'))
 {
-	define('AUTHENTICATE_VERSION', '1.2.8');
+	define('AUTHENTICATE_VERSION', '1.2.9');
 }
 
 $config['authenticate_version']   = AUTHENTICATE_VERSION;
