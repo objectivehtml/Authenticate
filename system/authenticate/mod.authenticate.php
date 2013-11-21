@@ -156,12 +156,19 @@ class Authenticate {
 					$this->EE->base_form->set_error(lang('authenticate_invalid_email'));
 				}
 			}	
-				
+
 			if( count($this->EE->base_form->field_errors) == 0 &&
 				count($this->EE->base_form->errors) == 0)
 			{
-				$this->EE->authenticate_lib->forgot_password();
-				
+				if(version_compare(APP_VER, '2.7.0', '<'))
+				{
+					$this->EE->authenticate_lib->forgot_password();
+				}
+				else
+				{
+					$this->EE->authenticate_lib->send_reset_token();
+				}
+
 				if(count($this->EE->base_form->errors) == 0)
 				{
 					$this->EE->base_form->redirect();

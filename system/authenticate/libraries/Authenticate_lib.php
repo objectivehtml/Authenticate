@@ -71,6 +71,115 @@ class Authenticate_lib {
 		
 		return TRUE;
 	}
+
+	public function send_reset_token()
+	{		
+		// if this user is logged in, then send them away.
+		if (ee()->session->userdata('member_id') !== 0)
+		{
+			return ee()->functions->redirect(ee()->functions->fetch_site_index());
+		}
+		
+		// Is user banned?
+		if (ee()->session->userdata('is_banned') === TRUE)
+		{
+			return ee()->output->show_user_error('general', array(lang('not_authorized')));
+		}
+
+		// Error trapping
+		if ( ! $address = ee()->input->post('email'))
+		{
+			return ee()->output->show_user_error('submission', array(lang('invalid_email_address')));
+		}
+
+		ee()->load->helper('email');
+		if ( ! valid_email($address))
+		{
+			return ee()->output->show_user_error('submission', array(lang('invalid_email_address')));
+		}
+
+		$address = strip_tags($address);
+
+		$memberQuery = ee()->db->select('member_id, username, screen_name')
+			->where('email', $address)
+			->get('members');
+
+		if ($memberQuery->num_rows() == 0)
+		{
+			return ee()->output->show_user_error('submission', array(lang('no_email_found')));
+		}
+
+		$member_id = $memberQuery->row('member_id');
+		$username  = $memberQuery->row('username');
+		$name  = ($memberQuery->row('screen_name') == '') ? $memberQuery->row('username') : $memberQuery->row('screen_name');
+
+		// Kill old data from the reset_password field
+		$a_day_ago = time() - (60*60*24);
+		ee()->db->where('date <', $a_day_ago)
+			->or_where('member_id', $member_id)
+			->delete('reset_password');
+
+		// Create a new DB record with the temporary reset code
+		$rand = ee()->functions->random('alnum', 8);
+		$data = array('member_id' => $member_id, 'resetcode' => $rand, 'date' => time());
+		ee()->db->query(ee()->db->insert_string('exp_reset_password', $data));
+
+		// Build the email message
+		if (ee()->input->get_post('FROM') == 'forum')
+		{
+			if (ee()->input->get_post('board_id') !== FALSE && 
+				is_numeric(ee()->input->get_post('board_id')))
+			{
+				$query = ee()->db->select('board_forum_url, board_id, board_label')
+					->where('board_id', ee()->input->get_post('board_id'))
+					->get('forum_boards');
+			}
+			else
+			{
+				$query = ee()->db->select('board_forum_url, board_id, board_label')
+					->where('board_id', (int) 1)
+					->get('forum_boards');
+			}
+
+			$return		= $query->row('board_forum_url') ;
+			$site_name	= $query->row('board_label') ;
+			$board_id	= $query->row('board_id') ;
+		}
+		else
+		{
+			$site_name	= stripslashes(ee()->config->item('site_name'));
+			$return 	= ee()->config->item('site_url');
+		}
+
+		$forum_id = (ee()->input->get_post('FROM') == 'forum') ? '&r=f&board_id='.$board_id : '';
+
+		$swap = array(
+			'name'		=> $name,
+			'reset_url'	=> reduce_double_slashes(ee()->functions->fetch_site_index(0, 0) . '/' . ee()->config->item('profile_trigger') . '/reset_password' .QUERY_MARKER.'&id='.$rand.$forum_id),
+			'site_name'	=> $site_name,
+			'site_url'	=> $return
+		);
+
+		$template = ee()->functions->fetch_email_template('forgot_password_instructions');
+		
+		// _var_swap calls string replace on $template[] for each key in
+		// $swap.  If the key doesn't exist then no swapping happens.  
+		$email_tit = $this->_var_swap($template['title'], $swap);
+		$email_msg = $this->_var_swap($template['data'], $swap);
+
+		// Instantiate the email class
+		ee()->load->library('email');
+		ee()->email->wordwrap = true;
+		ee()->email->from(ee()->config->item('webmaster_email'), ee()->config->item('webmaster_name'));
+		ee()->email->to($address);
+		ee()->email->subject($email_tit);
+		ee()->email->message($email_msg);
+
+		if ( ! ee()->email->send())
+		{
+			return ee()->output->show_user_error('submission', array(lang('error_sending_email')));
+		}
+	}
 	
 	public function forgot_password()
 	{
@@ -153,9 +262,18 @@ class Authenticate_lib {
 
 		$forum_id = ($this->EE->input->get_post('FROM') == 'forum') ? '&r=f&board_id='.$board_id : '';
 
+		if(version_compare(APP_VER, '2.7.0', '>='))
+		{
+			$url = $this->EE->functions->fetch_site_index(0, 0).QUERY_MARKER.'ACT='.$this->EE->functions->fetch_action_id('Member', 'send_reset_token').'&id='.$rand.$forum_id;
+		}
+		else
+		{
+			$url = $this->EE->functions->fetch_site_index(0, 0).QUERY_MARKER.'ACT='.$this->EE->functions->fetch_action_id('Member', 'reset_password').'&id='.$rand.$forum_id;
+		}
+
 		$swap = array(
 						'name'		=> $username,
-						'reset_url'	=> $this->EE->functions->fetch_site_index(0, 0).QUERY_MARKER.'ACT='.$this->EE->functions->fetch_action_id('Member', 'reset_password').'&id='.$rand.$forum_id,
+						'reset_url'	=> $url,
 						'site_name'	=> $site_name,
 						'site_url'	=> $return
 					 );
