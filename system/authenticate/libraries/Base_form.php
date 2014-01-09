@@ -9,8 +9,8 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Justin Kimbrell
  * @link 		http://www.objectivehtml.com/libraries/base_form
- * @version		1.6.1
- * @build		20131115
+ * @version		1.6.2
+ * @build		20131125
  */
 
 if(!class_exists('Base_form'))
@@ -225,7 +225,7 @@ if(!class_exists('Base_form'))
 			if(count($this->field_errors) > 0)
 			{
 				$x = 0;
-				
+
 				foreach($this->field_errors as $field => $error)
 				{
 					$errors[0]['field_errors'][$x] 		= array('error' => $error);
@@ -283,7 +283,7 @@ if(!class_exists('Base_form'))
 			{
 				$hidden_fields['XID'] = XID_SECURE_HASH;
 			}
-			
+
 			// Return the form
 			return form_open($this->action, $params, $hidden_fields) . $this->tagdata . '</form>';
 		}
@@ -400,7 +400,7 @@ if(!class_exists('Base_form'))
 		
 		public function set_field_error($field, $message)
 		{
-			$this->field_errors[$this->decode($field)] = $message;
+			$this->field_errors[$field] = $message;
 		}
 		
 		public function parse_fields($field_data, $entry_data, $prefix = '')
