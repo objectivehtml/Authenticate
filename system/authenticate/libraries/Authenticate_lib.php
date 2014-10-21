@@ -73,7 +73,7 @@ class Authenticate_lib {
 	}
 
 	public function send_reset_token()
-	{		
+	{						
 		// if this user is logged in, then send them away.
 		if (ee()->session->userdata('member_id') !== 0)
 		{
@@ -157,7 +157,8 @@ class Authenticate_lib {
 			'name'		=> $name,
 			'reset_url'	=> reduce_double_slashes(ee()->functions->fetch_site_index(0, 0) . '/' . ee()->config->item('profile_trigger') . '/reset_password' .QUERY_MARKER.'&id='.$rand.$forum_id),
 			'site_name'	=> $site_name,
-			'site_url'	=> $return
+			'site_url'	=> $return,
+			'username'  => $username
 		);
 
 		$template = ee()->functions->fetch_email_template('forgot_password_instructions');
