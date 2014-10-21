@@ -141,6 +141,7 @@ class Authenticate {
 		
 		if($this->EE->input->post('authenticate_reset_password'))
 		{
+			$this->EE->base_form->validate();
 			
 			$emails = $this->EE->channel_data->get_members(array(
 				'where' => array(

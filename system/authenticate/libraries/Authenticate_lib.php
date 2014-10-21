@@ -262,7 +262,7 @@ class Authenticate_lib {
 
 		$forum_id = ($this->EE->input->get_post('FROM') == 'forum') ? '&r=f&board_id='.$board_id : '';
 
-		if(version_compare(APP_VER, '2.7.0', '>='))
+		if(version_compare(APP_VER, '2.6.0', '>='))
 		{
 			$url = $this->EE->functions->fetch_site_index(0, 0).QUERY_MARKER.'ACT='.$this->EE->functions->fetch_action_id('Member', 'send_reset_token').'&id='.$rand.$forum_id;
 		}
