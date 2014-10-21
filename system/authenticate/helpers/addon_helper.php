@@ -6,8 +6,8 @@
  * @author		Justin Kimbrell
  * @copyright	Copyright (c) 2012, Objective HTML
  * @link 		http://www.objectivehtml.com/
- * @version		1.0.1
- * @build		20130619
+ * @version		1.0.2
+ * @build		20130718
  */
 
 /**
@@ -82,9 +82,22 @@ if(!function_exists('page_url'))
 		
 		if($uri_segments)
 		{
-			$uri = '/' . implode('/', $segments);
+			if(count($segments) > 0)
+			{
+				$uri = '/' . implode('/', $segments);
+			}
+			else
+			{
+				$uri 	  = preg_replace('/\?.*$/', '', $_SERVER['REQUEST_URI']);
+				$filename = basename($uri);
+				$uri      = str_replace($filename, '', $uri);
+			}
 		}
-		
+		else
+		{
+			$uri = isset($_SERVER['PHP_SELF']) ? $_SERVER['PHP_SELF'] : NULL;	
+		}
+
 		if(count($_GET) > 0 && $append_get)
 		{
 			$get = '?'.http_build_query($_GET);
@@ -138,13 +151,9 @@ if(!function_exists('base_page'))
 			 $_SERVER['SCRIPT_URI'] = $http . $_SERVER['HTTP_HOST']. $_SERVER['REQUEST_URI'];
 		}
 		
-		$segments = rtrim(str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']), '/');
-		$base_url = rtrim($http . $_SERVER['HTTP_HOST'] . $segments . '/' . config_item('site_index'), '/');
-		$base_url = str_replace(array('http://', 'https://'), '', $base_url);
-		
 		if(!$use_config)
 		{
-			$return = $http . $base_url . $append;
+			$return = $http . $_SERVER['HTTP_HOST'] . $append;
 		}
 		else
 		{

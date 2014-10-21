@@ -17,6 +17,7 @@ class Authenticate {
 	{
 		$this->EE =& get_instance();
 		
+		$this->EE->load->helper('url_helper');
 		$this->EE->lang->loadfile('authenticate');
 		$this->EE->load->library('authenticate_lib');
 		$this->EE->load->driver('channel_data');	
